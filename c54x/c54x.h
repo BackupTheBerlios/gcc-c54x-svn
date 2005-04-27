@@ -38,7 +38,7 @@ extern int target_flags;
 #define PARM_BOUNDARY            BITS_PER_WORD
 #define STACK_BOUNDARY           BITS_PER_WORD
 #define FUNCTION_BOUNDARY        BITS_PER_WORD
-#define BIGGEST_ALIGNMENT        BITS_PER_WORD
+#define BIGGEST_ALIGNMENT        BITS_PER_WORD*2
 #define MINIMUM_ATOMIC_ALIGNMENT BITS_PER_WORD
 #define EMPTY_FIELD_BOUNDARY	 BITS_PER_WORD
 #define STRICT_ALIGNMENT	     1 /* Nothing is smaller than alignment.. */
@@ -414,8 +414,7 @@ enum reg_class
 	} \
 }
 
-/* Node: Passing Function Arguments on the Stack
----------------------------------------------- */
+/* Node: Passing Function Arguments on the Stack */
 
 #define PUSH_ARGS 1
 
