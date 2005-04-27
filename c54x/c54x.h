@@ -383,6 +383,8 @@ enum reg_class
 
 /* Node: Elimination */
 
+#define FRAME_POINTER_REQUIRED 0
+
 #define ELIMINABLE_REGS  \
   {{ARG_POINTER_REGNUM, STACK_POINTER_REGNUM}, \
   {ARG_POINTER_REGNUM, FRAME_POINTER_REGNUM}, \
@@ -391,3 +393,23 @@ enum reg_class
    we also try to eliminate the frame pointer with the stack pointer. */
 
 #define CAN_ELIMINATE (FROM-REG, TO-REG) 1
+
+#define INITIAL_ELIMINATION_OFFSET(FROM, TO, OFFSET) \
+{ \
+	int offset = 0; \
+	int regno; \
+	if((FROM) == (ARG_POINTER_REGNUM) && (TO) == (FRAME_POINTER_REGNUM)) { \
+		(OFFSET) = -1; /* We have a fixed offset between the frame pointer and arg pointer */ \
+	} else { /* Otherwise, we start by calculating the difference between the frame pointer and stack pointer */ \
+		for(regno = 0; regno < (FIRST_PSEUDO_REGISTER); regno++) { \
+			if(regs_ever_live[regno] != 0 && call_used_regs[regno] == 0) { \
+				/* If we end up here, it means that this register is saved on the stack */ \
+				offset -= 1; \
+			} \
+			offset -= get_frame_size(); \
+			/* offset now contains the difference between the stack pointer and frame pointer (fp + offset = sp) */ \
+			offset += (FROM) == (ARG_POINTER_REGNUM) ? -1 : 0; \
+			(OFFSET) = offset; \
+		} \
+	} \
+}
