@@ -385,12 +385,12 @@ enum reg_class
 
 #define FRAME_POINTER_REQUIRED 0
 
+/* We want to eliminate the fake argument register with the frame/stack pointer,
+   we also try to eliminate the frame pointer with the stack pointer. */
 #define ELIMINABLE_REGS  \
   {{ARG_POINTER_REGNUM, STACK_POINTER_REGNUM}, \
   {ARG_POINTER_REGNUM, FRAME_POINTER_REGNUM}, \
   {FRAME_POINTER_REGNUM, STACK_POINTER_REGNUM}}
-/* We want to eliminate the fake argument register with the frame/stack pointer,
-   we also try to eliminate the frame pointer with the stack pointer. */
 
 #define CAN_ELIMINATE (FROM-REG, TO-REG) 1
 
@@ -413,3 +413,13 @@ enum reg_class
 		} \
 	} \
 }
+
+/* Node: Passing Function Arguments on the Stack
+---------------------------------------------- */
+
+#define PUSH_ARGS 1
+
+#define PUSH_ROUNDING (BYTES) (BYTES)
+
+/* The caller does all the popping. */
+#define RETURN_POPS_ARGS (FUNDECL, FUNTYPE, STACK-SIZE) 0
