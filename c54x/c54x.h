@@ -32,12 +32,16 @@ extern int target_flags;
 #define FLOAT_WORDS_BIG_ENDIAN  1  /* no floats... */
 #define BITS_PER_UNIT           16 
 #define UNITS_PER_WORD          1
-#define PARM_BOUNDARY           16
-#define STACK_BOUNDARY          16
-#define FUNCTION_BOUNDARY       16
-#define BIGGEST_ALIGNMENT       16 /* FIXME */
-#define EMPTY_FIELD_BOUNDARY	16
-#define STRICT_ALIGNMENT	    0  /* FIXME (ripped from c4x) */
+
+/* Promotion stuff, which doesn't matter. No mode is narrower than 16. */
+
+#define PARM_BOUNDARY            BITS_PER_WORD
+#define STACK_BOUNDARY           BITS_PER_WORD
+#define FUNCTION_BOUNDARY        BITS_PER_WORD
+#define BIGGEST_ALIGNMENT        BITS_PER_WORD
+#define MINIMUM_ATOMIC_ALIGNMENT BITS_PER_WORD
+#define EMPTY_FIELD_BOUNDARY	 BITS_PER_WORD
+#define STRICT_ALIGNMENT	     1 /* Nothing is smaller than alignment.. */
 #define MAX_FIXED_MODE_SIZE     32 /* HImode, same as c4x */
 /* VECTOR_MODE_SUPPORTED? */
 
@@ -325,32 +329,6 @@ enum reg_class
 /* A bunch of stuff about reloading that, as far as I know, I don't need. I very
  * well could be wrong, of course. */
 
-/* Going with the default for CLASS_LIKELY_SPILLED_P */
-/* We should probably not define this to have the default */
-#define CLASS_LIKELY_SPILLED_P (CLASS)    \
-    switch (CLASS) {                      \
-        /* 1-reg classes */               \
-        case IMR_REG:                     \
-        case IFR_REG:                     \
-        case ST0_REG:                     \
-        case ST1_REG:                     \
-        case A_REG:                       \
-        case B_REG:                       \
-        case T_REG:                       \
-        case TRN_REG:                     \
-        case AR0_REG:                     \
-        case SP_REG:                      \
-        case BK_REG:                      \
-        case BRC_REG:                     \
-        case RSA_REG:                     \
-        case REA_REG:                     \
-        case PMST_REG:                    \
-        case XPC_REG:                     \
-            return 1;                     \
-            break;                        \
-        default:                          \
-            return 0;                     \
-    }
                                          
 /* From c4x.h */
 #define CLASS_MAX_NREGS (CLASS, MODE)   \
