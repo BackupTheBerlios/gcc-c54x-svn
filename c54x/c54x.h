@@ -395,7 +395,7 @@ enum reg_class
 #define CAN_ELIMINATE (FROM-REG, TO-REG) 1
 
 #define INITIAL_ELIMINATION_OFFSET(FROM, TO, OFFSET) \
-{ \
+do { \
 	int offset = 0; \
 	int regno; \
 	if((FROM) == (ARG_POINTER_REGNUM) && (TO) == (FRAME_POINTER_REGNUM)) { \
@@ -406,13 +406,13 @@ enum reg_class
 				/* If we end up here, it means that this register is saved on the stack */ \
 				offset -= 1; \
 			} \
-			offset -= get_frame_size(); \
-			/* offset now contains the difference between the stack pointer and frame pointer (fp + offset = sp) */ \
-			offset += (FROM) == (ARG_POINTER_REGNUM) ? -1 : 0; \
-			(OFFSET) = offset; \
 		} \
+		offset -= get_frame_size(); \
+		/* offset now contains the difference between the stack pointer and frame pointer (fp + offset = sp) */ \
+		offset += (FROM) == (ARG_POINTER_REGNUM) ? -1 : 0; \
+		(OFFSET) = offset; \
 	} \
-}
+} while(0);
 
 /* Node: Passing Function Arguments on the Stack */
 
@@ -422,3 +422,19 @@ enum reg_class
 
 /* The caller does all the popping. */
 #define RETURN_POPS_ARGS (FUNDECL, FUNTYPE, STACK-SIZE) 0
+
+/* Node: Passing Arguments in Registers */
+#define FUNCTION_ARG (CUM, MODE, TYPE, NAMED) c54x_function_arg(CUM, MODE, TYPE, NAMED)
+
+struct cumul_args {
+	int has_varargs;
+	int numarg;
+};
+
+#define CUMULATIVE_ARGS struct cumul_args
+
+#define INIT_CUMULATIVE_ARGS (CUM, FNTYPE, LIBNAME, FNDECL, N_NAMED_ARGS) \
+	(init_cumulative_args(&(CUM), (FNTYPE), (LIBNAME), (FNDECL)))
+
+#define FUNCTION_ARG (CUM, MODE, TYPE, NAMED) \
+	(function_arg(&(CUM), (MODE), (TYPE), (NAMED)))
