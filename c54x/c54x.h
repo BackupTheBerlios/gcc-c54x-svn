@@ -424,7 +424,6 @@ do { \
 #define RETURN_POPS_ARGS (FUNDECL, FUNTYPE, STACK-SIZE) 0
 
 /* Node: Passing Arguments in Registers */
-#define FUNCTION_ARG (CUM, MODE, TYPE, NAMED) c54x_function_arg(CUM, MODE, TYPE, NAMED)
 
 struct cumul_args {
 	int has_varargs;
