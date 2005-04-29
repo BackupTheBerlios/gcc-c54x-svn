@@ -437,3 +437,18 @@ struct cumul_args {
 
 #define FUNCTION_ARG (CUM, MODE, TYPE, NAMED) \
 	(function_arg(&(CUM), (MODE), (TYPE), (NAMED)))
+
+#define FUNCTION_ARG_ADVANCE (CUM, MODE, TYPE, NAMED) \
+	(function_arg_advance(&(CUM), (MODE), (TYPE), (NAMED)))
+
+/* Node: 13.9.8 How Scalar Function Values Are Returned
+---------------------------------------------- */
+
+#define FUNCTION_VALUE (VALTYPE, FUNC) \
+	gen_rtx_REG(TYPE_MODE(VALTYPE), A_REGNO) /* Values are returned in A */
+
+#define LIBCALL_VALUE (MODE) \
+	gen_rtx_REG((MODE), A_REGNO)
+
+#define FUNCTION_VALUE_REGNO_P (REGNO) \
+	((REGNO) == A_REGNO ? 1 : 0)

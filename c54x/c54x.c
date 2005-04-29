@@ -26,3 +26,9 @@ function_arg (CUMULATIVE_ARGS *cum, enum machine_mode mode, tree type, int named
 
 	return ret;
 }
+
+void
+function_arg_advance (CUMULATIVE_ARGS *cum, enum machine_mode mode, tree type, int named)
+{
+	cum->numarg++;
+}
