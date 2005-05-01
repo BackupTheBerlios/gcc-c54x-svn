@@ -157,8 +157,7 @@ extern int target_flags;
 /* REG_ALLOC_ORDER will be important */
 
 /* Node: Values in Registers */
-/* HARD_REGNO_MODE_OK will need to be filled in with info on reg types and
-   data types (modes) */
+#define HARD_REGNO_MODE_OK /* will need to be filled in with info on reg types and data types (modes) */
 
 /* Node: Leaf Functions */
 /* cris and c4x don't use these, but I think I could, what with the
@@ -192,6 +191,7 @@ enum reg_class
     STAT_REGS,
     ACC_REGS,
     BR_REGS,
+    GENERAL_REGS,
     ALL_REGS,
     LIM_REG_CLASSES
   };
@@ -223,6 +223,7 @@ enum reg_class
     "STAT_REGS",        \
     "ACC_REGS",         \
     "BR_REGS",          \
+    "GENERAL_REGS",     \
     "ALL_REGS",         \
 }
 
@@ -252,7 +253,8 @@ enum reg_class
     {0x0020000c}, /* STAT_REGS */ \
     {0x00000030}, /* ACC_REGS */ \
     {0x001c0000}, /* BR_REGS */ \
-    {0xFFFFFFFF}, /* ALL_REGS */ \
+    {0x001efff0}, /* GENERAL_REGS */ \
+    {0xFFFFFFFF}  /* ALL_REGS */ \
 }
 
 /* #define REGNO_REG_CLASS (REGNO), which in c4x returns
