@@ -179,6 +179,7 @@ enum reg_class
     T_REG,
     TRN_REG,
     AR0_REG,
+    DBL_OP_REGS,
     AUX_REGS,
     SP_REG,
     BK_REG,
@@ -209,6 +210,7 @@ enum reg_class
     "T_REG",            \
     "TRN_REG",          \
     "AR0_REG",          \
+    "DBL_OP_REGS",      \
     "AUX_REGS",         \
     "SP_REG",           \
     "BK_REG",           \
@@ -237,6 +239,7 @@ enum reg_class
     {0x00000040}, /* T_REG */ \
     {0x00000080}, /* TRN_REG */ \
     {0x00000100}, /* AR0_REG */ \
+    {0x00003C00}, /* DBL_OP_REGS */ \
     {0x0000FF00}, /* AUX_REGS */ \
     {0x00010000}, /* SP_REG */ \
     {0x00020000}, /* BK_REG */ \
@@ -282,6 +285,7 @@ enum reg_class
  * u - ST1 reg
  * v - PMST reg
  * x - XPC reg
+ * y - DBL_OP_REGS
  *
  * Integer range constraints
  *
@@ -301,7 +305,7 @@ enum reg_class
     : ((c) == 'e') ? AUX_REGS      \
     : ((c) == 'f') ? T_REG         \
     : ((c) == 'g') ? TRN_REG       \
-    : ((c) == 'h') ? SP_REG       \
+    : ((c) == 'h') ? SP_REG        \
     : ((c) == 'i') ? INT_REGS      \
     : ((c) == 'm') ? BR_REGS       \
     : ((c) == 'n') ? BRC_REG       \
@@ -312,6 +316,7 @@ enum reg_class
     : ((c) == 'u') ? ST1_REG       \
     : ((c) == 'v') ? PMST_REG      \
     : ((c) == 'x') ? XPC_REG       \
+    : ((c) == 'y') ? DBL_OP_REGS   \
     : NO_REGS )
 
 /* Oohh one of those seemingly overlapping macros.
@@ -400,17 +405,20 @@ do { \
 	int regno; \
 	if((FROM) == (ARG_POINTER_REGNUM) && (TO) == (FRAME_POINTER_REGNUM)) { \
 		(OFFSET) = -1; /* We have a fixed offset between the frame pointer and arg pointer */ \
-	} else { /* Otherwise, we start by calculating the difference between the frame pointer and stack pointer */ \
+	} else {  \
+        /* Otherwise, we start by calculating the difference between the frame pointer  \
+         * and stack pointer */ \
 		for(regno = 0; regno < (FIRST_PSEUDO_REGISTER); regno++) { \
 			if(regs_ever_live[regno] != 0 && call_used_regs[regno] == 0) { \
 				/* If we end up here, it means that this register is saved on the stack */ \
 				offset -= 1; \
 			} \
 		} \
-		offset -= get_frame_size(); \
-		/* offset now contains the difference between the stack pointer and frame pointer (fp + offset = sp) */ \
-		offset += (FROM) == (ARG_POINTER_REGNUM) ? -1 : 0; \
-		(OFFSET) = offset; \
+        offset -= get_frame_size(); \
+        /* offset now contains the difference between the stack pointer \
+         * and frame pointer (fp + offset = sp) */ \ 
+        offset += (FROM) == (ARG_POINTER_REGNUM) ? -1 : 0; \
+        (OFFSET) = offset; \
 	} \
 } while(0);
 
