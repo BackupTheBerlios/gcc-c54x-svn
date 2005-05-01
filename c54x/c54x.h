@@ -115,28 +115,33 @@ extern int target_flags;
 
 #define XPC_REGNO  22
 
+/* Data Page register */
+#define DP_REGNO   23
+
 /* Fake argument pointer reg */
-#define ARG_REGNO  23
+#define ARG_REGNO  24
 
 /* PC reg? */
 
 /* Node: Not a node */
 
-#define AUX_REG_P(r) \
-    ((unsigned int)r - AR0_REGNO <= AR7_REGNO - AR0_REGNO)
+#define AUX_REGNO_P (r) \
+    ((unsigned int)(r) - AR0_REGNO <= AR7_REGNO - AR0_REGNO)
+#define ACC_REGNO_P (r) \
+    ((unsigned int)(r) - A_REGNO <= B_REGNO - A_REGNO)
 
 /* Node: Register Basics */
 
 /* number of registers */
-#define FIRST_PSEUDO_REGISTER 24
+#define FIRST_PSEUDO_REGISTER 25
 
 /* registers that have a fixed purpose and can't be used for general tasks. */
 #define FIXED_REGISTERS \
 { \
   /* IMR IFR ST0 ST1 A   B   T   TRN AR0 AR1 AR2 */ \
      1,  1,  1,  1,  0,  0,  0,  0,  0,  0,  0, \
-  /* AR3 AR4 AR5 AR6 AR7 SP  BK  BRC RSA REA PMST XPC ARG*/ \
-     0,  0,  0,  0,  0,  1,  0,  0,  0,  0,  1,   1,  1  \
+  /* AR3 AR4 AR5 AR6 AR7 SP  BK  BRC RSA REA PMST XPC DP ARG*/ \
+     0,  0,  0,  0,  0,  1,  0,  0,  0,  0,  1,   1,  1, 1  \
 }
 
 /* FIXED */
@@ -144,8 +149,8 @@ extern int target_flags;
 { \
   /* IMR IFR ST0 ST1 A   B   T   TRN AR0 AR1 AR2 */ \
      1,  1,  1,  1,  1,  1,  1,  1,  1,  0,  1, \
-  /* AR3 AR4 AR5 AR6 AR7 SP  BK  BRC RSA REA PMST XPC ARG */ \
-     1,  1,  1,  0,  0,  1,  1,  1,  1,  1,  1,   1,   1\
+  /* AR3 AR4 AR5 AR6 AR7 SP  BK  BRC RSA REA PMST XPC DP ARG */ \
+     1,  1,  1,  0,  0,  1,  1,  1,  1,  1,  1,   1,  1, 1 \
 }
 
 
@@ -157,7 +162,7 @@ extern int target_flags;
 /* REG_ALLOC_ORDER will be important */
 
 /* Node: Values in Registers */
-#define HARD_REGNO_MODE_OK /* will need to be filled in with info on reg types and data types (modes) */
+#define HARD_REGNO_MODE_OK (REGNO, MODE) (c54x_hard_regno_mode_ok(REGNO, MODE))
 
 /* Node: Leaf Functions */
 /* cris and c4x don't use these, but I think I could, what with the
@@ -187,6 +192,7 @@ enum reg_class
     REA_REG,
     PMST_REG,
     XPC_REG,
+    DP_REG,
     INT_REGS,
     STAT_REGS,
     ACC_REGS,
@@ -219,6 +225,7 @@ enum reg_class
     "REA_REG",          \
     "PMST_REG",         \
     "XPC_REG",          \
+    "DP_REG",           \
     "INT_REGS",         \
     "STAT_REGS",        \
     "ACC_REGS",         \
@@ -249,6 +256,7 @@ enum reg_class
     {0x00100000}, /* REA_REG */ \
     {0x00200000}, /* PMST_REG */ \
     {0x00400000}, /* XPC_REG */ \
+    {0x00800000}, /* DP_REG */ \
     {0x00000003}, /* INT_REGS */ \
     {0x0020000c}, /* STAT_REGS */ \
     {0x00000030}, /* ACC_REGS */ \
@@ -282,10 +290,12 @@ enum reg_class
  * n - BRC reg
  * o - RSA reg
  * p - REA reg
+ * r - General regs
  * s - STAT_REGS
  * t - ST0 reg
  * u - ST1 reg
  * v - PMST reg
+ * w - DP reg
  * x - XPC reg
  * y - DBL_OP_REGS
  *
@@ -317,6 +327,7 @@ enum reg_class
     : ((c) == 't') ? ST0_REG       \
     : ((c) == 'u') ? ST1_REG       \
     : ((c) == 'v') ? PMST_REG      \
+    : ((c) == 'w') ? DP_REG        \
     : ((c) == 'x') ? XPC_REG       \
     : ((c) == 'y') ? DBL_OP_REGS   \
     : NO_REGS )
