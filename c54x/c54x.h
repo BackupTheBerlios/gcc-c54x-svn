@@ -129,6 +129,15 @@ extern int target_flags;
     ((unsigned int)(r) - AR0_REGNO <= AR7_REGNO - AR0_REGNO)
 #define ACC_REGNO_P (r) \
     ((unsigned int)(r) - A_REGNO <= B_REGNO - A_REGNO)
+#define ST_REGNO_P (r) \
+    ((unsigned int)(r) - ST0_REGNO <= ST1_REGNO - ST0_REGNO)
+#define T_REGNO_P (r) \
+    ((r) == T_REGNO)
+#define DP_REGNO_P (r) \
+    ((r) == DP_REGNO)
+#define SP_REGNO_P (r) \
+    ((r) == SP_REGNO)
+
 
 /* Node: Register Basics */
 
@@ -412,7 +421,7 @@ enum reg_class
 
 #define CAN_ELIMINATE (FROM-REG, TO-REG) 1
 
-#define INITIAL_ELIMINATION_OFFSET(FROM, TO, OFFSET) \
+#define INITIAL_ELIMINATION_OFFSET (FROM, TO, OFFSET) \
 do { \
 	int offset = 0; \
 	int regno; \

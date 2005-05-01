@@ -1,3 +1,19 @@
+int
+c54x_hard_regno_mode_ok (unsigned int regno, enum machine_mode mode)
+{
+	switch(mode) {
+	case QImode:
+		return (AUX_REGNO_P(regno) || ACC_REGNO_P(regno)
+				|| SP_REGNO_P(regno) || T_REGNO_P(regno));
+	case HImode:
+		return (ACC_REGNO_P(regno));
+	case CCmode:
+		return (ST_REGNO_P(regno));
+	default:
+		return 0;
+	}
+}
+
 void
 init_cumulative_args (CUMULATIVE_ARGS *cum, tree fntype, rtx libname, tree fndecl)
 {
