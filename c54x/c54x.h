@@ -3,11 +3,8 @@ Definitions and stuff */
 
 /* As "Porting GCC For Dunces" is one of my references, this will draw from the
  * cris port that is highlighted therein. It will also rely on the c4x, for
- * obvious reasons. 
+ * obvious reasons.
  * Edit: Gah, too bad they are both buggy and under-maintained. */
-
-/* Node: Target Structure */
-struct gcc_target targetm;
 
 /* Node: Driver */
 /* Node: Run-time Target Specification */
@@ -25,12 +22,12 @@ extern int target_flags;
 
 /* Node: Per-Function Data */
 
-/* Node: Storage Layout */ 
-#define BITS_BIG_ENDIAN         1  
+/* Node: Storage Layout */
+#define BITS_BIG_ENDIAN         1
 #define BYTES_BIG_ENDIAN        1
 #define WORDS_BIG_ENDIAN        1
 #define FLOAT_WORDS_BIG_ENDIAN  1  /* no floats... */
-#define BITS_PER_UNIT           16 
+#define BITS_PER_UNIT           16
 #define UNITS_PER_WORD          1
 
 /* Promotion stuff, which doesn't matter. No mode is narrower than 16. */
@@ -171,7 +168,7 @@ extern int target_flags;
 /* REG_ALLOC_ORDER will be important */
 
 /* Node: Values in Registers */
-#define HARD_REGNO_MODE_OK (REGNO, MODE) (c54x_hard_regno_mode_ok(REGNO, MODE))
+#define HARD_REGNO_MODE_OK(REGNO, MODE) c54x_hard_regno_mode_ok(REGNO, MODE)
 
 /* Node: Leaf Functions */
 /* cris and c4x don't use these, but I think I could, what with the
@@ -317,7 +314,7 @@ enum reg_class
  * M - 9 bit int
  */
 
-#define REG_CLASS_FROM_LETTER (c)  \
+#define REG_CLASS_FROM_LETTER(c)  \
     \
     ( ((c) == 'a') ? A_REG         \
     : ((c) == 'b') ? B_REG         \
@@ -344,30 +341,30 @@ enum reg_class
 /* Oohh one of those seemingly overlapping macros.
  * I'm going to set this to be true for aux regs, which might not be as broad as
  * possible. */
-#define REGNO_OK_FOR_BASE_P (n)  \
+#define REGNO_OK_FOR_BASE_P(n) AUX_REGNO_P(n)
 
 
 /* Same as REGNO_OK_FOR_BASE_P */
-#define REGNO_OK_FOR_INDEX_P (n) REGNO_OK_FOR_BASE_P (n)
+#define REGNO_OK_FOR_INDEX_P(n) REGNO_OK_FOR_BASE_P (n)
 
 /* This will work, but might not be optimal */
-#define PREFERRED_RELOAD_CLASS (x, CLASS) CLASS
+#define PREFERRED_RELOAD_CLASS(x, CLASS) CLASS
 
 /* A bunch of stuff about reloading that, as far as I know, I don't need. I very
  * well could be wrong, of course. */
 
-                                         
+
 /* From c4x.h */
-#define CLASS_MAX_NREGS (CLASS, MODE)   \
+#define CLASS_MAX_NREGS(CLASS, MODE)   \
     ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD)
 
 /* I might need more than this, but I decdided to err on the side of minimizing
  * bloat.
  */
-#define IN_RANGE_P (val, bottom, top) \
+#define IN_RANGE_P(val, bottom, top) \
     (bottom <= val && val <= top)
 
-#define CONST_OK_FOR_LETTER_P (value, c)               \
+#define CONST_OK_FOR_LETTER_P(value, c)               \
     ( ((c) == 'I') ? IN_RANGE_P (value, -32768, 32767) \
     : ((c) == 'J') ? IN_RANGE_P (value, 0, 7)          \
     : ((c) == 'K') ? IN_RANGE_P (value, 0, 15)         \
@@ -408,7 +405,7 @@ enum reg_class
 
 #define ARG_POINTER_REGNUM   ARG_REGNO
 
-/* Node: Elimination */
+/* Node: 13.9.5 Eliminating Frame Pointer and Arg Pointer */
 
 #define FRAME_POINTER_REQUIRED 0
 
@@ -419,9 +416,9 @@ enum reg_class
   {ARG_POINTER_REGNUM, FRAME_POINTER_REGNUM}, \
   {FRAME_POINTER_REGNUM, STACK_POINTER_REGNUM}}
 
-#define CAN_ELIMINATE (FROM-REG, TO-REG) 1
+#define CAN_ELIMINATE(FROM, TO) 1
 
-#define INITIAL_ELIMINATION_OFFSET (FROM, TO, OFFSET) \
+#define INITIAL_ELIMINATION_OFFSET(FROM, TO, OFFSET) \
 do { \
 	int offset = 0; \
 	int regno; \
@@ -438,20 +435,25 @@ do { \
 		} \
         offset -= get_frame_size(); \
         /* offset now contains the difference between the stack pointer \
-         * and frame pointer (fp + offset = sp) */ \ 
+         * and frame pointer (fp + offset = sp) */ \
         offset += (FROM) == (ARG_POINTER_REGNUM) ? -1 : 0; \
         (OFFSET) = offset; \
 	} \
 } while(0);
 
+/* Node: 13.11 Trampolines for Nested Functions */
+#define TRAMPOLINE_SIZE 2 /* Just a guess for now */
+#define INITIALIZE_TRAMPOLINE(TRAMP, FNADDR, CXT) \
+	c54x_initialize_trampoline((TRAMP), (FNADDR), (CXT))
+
 /* Node: Passing Function Arguments on the Stack */
 
 #define PUSH_ARGS 1
 
-#define PUSH_ROUNDING (BYTES) (BYTES)
+#define PUSH_ROUNDING(BYTES) (BYTES)
 
 /* The caller does all the popping. */
-#define RETURN_POPS_ARGS (FUNDECL, FUNTYPE, STACK-SIZE) 0
+#define RETURN_POPS_ARGS(FUNDECL, FUNTYPE, STACKSIZE) 0
 
 /* Node: Passing Arguments in Registers */
 
@@ -462,22 +464,42 @@ struct cumul_args {
 
 #define CUMULATIVE_ARGS struct cumul_args
 
-#define INIT_CUMULATIVE_ARGS (CUM, FNTYPE, LIBNAME, FNDECL, N_NAMED_ARGS) \
+#define INIT_CUMULATIVE_ARGS(CUM, FNTYPE, LIBNAME, FNDECL, N_NAMED_ARGS) \
 	(init_cumulative_args(&(CUM), (FNTYPE), (LIBNAME), (FNDECL)))
 
-#define FUNCTION_ARG (CUM, MODE, TYPE, NAMED) \
+#define FUNCTION_ARG(CUM, MODE, TYPE, NAMED) \
 	(function_arg(&(CUM), (MODE), (TYPE), (NAMED)))
 
-#define FUNCTION_ARG_ADVANCE (CUM, MODE, TYPE, NAMED) \
+#define FUNCTION_ARG_ADVANCE(CUM, MODE, TYPE, NAMED) \
 	(function_arg_advance(&(CUM), (MODE), (TYPE), (NAMED)))
+
+#define FUNCTION_ARG_REGNO_P(REGNO) (REGNO == A_REGNO)
 
 /* Node: 13.9.8 How Scalar Function Values Are Returned */
 
-#define FUNCTION_VALUE (VALTYPE, FUNC) \
+#define FUNCTION_VALUE(VALTYPE, FUNC) \
 	gen_rtx_REG(TYPE_MODE(VALTYPE), A_REGNO) /* Values are returned in A */
 
-#define LIBCALL_VALUE (MODE) \
+#define LIBCALL_VALUE(MODE) \
 	gen_rtx_REG((MODE), A_REGNO)
 
-#define FUNCTION_VALUE_REGNO_P (REGNO) \
-	((REGNO) == A_REGNO ? 1 : 0)
+#define FUNCTION_VALUE_REGNO_P(REGNO) \
+	((REGNO) == A_REGNO)
+
+/* Node: 13.13 Addressing Modes */
+
+#define MAX_REGS_PER_ADDRESS 2
+
+/* Node: 13.15 Describing Relative Costs of Operations */
+
+#define SLOW_BYTE_ACCESS 1
+
+/* Node: 13.27 Miscellaneous Parameters */
+
+#define Pmode QImode
+
+#define FUNCTION_MODE QImode
+
+#define MOVE_MAX 1
+
+#define CASE_VECTOR_MODE QImode
