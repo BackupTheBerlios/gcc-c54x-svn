@@ -271,8 +271,7 @@ enum reg_class
     {0xFFFFFFFF}  /* ALL_REGS */ \
 }
 
-/* #define REGNO_REG_CLASS (REGNO), which in c4x returns
-   regclass_map[REGNO] */
+#define REGNO_REG_CLASS (REGNO) c54x_regclass_map[REGNO]
 
 #define BASE_REG_CLASS AUX_REGS
 
