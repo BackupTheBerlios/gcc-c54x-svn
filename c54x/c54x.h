@@ -371,6 +371,10 @@ enum reg_class
     : ((c) == 'M') ? IN_RANGE_P (value, 0, 511)        \
     : 0 )
 
+extern const enum reg_class regclass_map[FIRST_PSEUDO_REGISTER];
+
+#define REGNO_REG_CLASS(REGNO) (regclass_map[REGNO])
+
 /* EXTRA_CONSTRAINT will probably come in useful, but it isn't required so I'll
  * do it later. */
 
@@ -489,9 +493,30 @@ struct cumul_args {
 
 #define MAX_REGS_PER_ADDRESS 2
 
+#define LEGITIMATE_CONSTANT_P(X) 1 /* Not sure */
+
+#ifdef REG_OK_STRICT
+#define GO_IF_LEGITIMATE_ADDRESS(MODE, X, ADDR)                         \
+do {                                                                    \
+  if (legitimate_address_p ((MODE), (X), 1))                            \
+    goto ADDR;                                                          \
+} while (0)
+#else
+#define GO_IF_LEGITIMATE_ADDRESS(MODE, X, ADDR)                         \
+do {                                                                    \
+  if (legitimate_address_p ((MODE), (X), 0))                            \
+    goto ADDR;                                                          \
+} while (0)
+#endif
+
 /* Node: 13.15 Describing Relative Costs of Operations */
 
 #define SLOW_BYTE_ACCESS 1
+
+/* Node: 13.19.1 The Overall Framework of an Assembler File */
+
+#define ASM_APP_ON  "#APP"
+#define ASM_APP_OFF "#NO_APP"
 
 /* Node: 13.27 Miscellaneous Parameters */
 
@@ -502,3 +527,4 @@ struct cumul_args {
 #define MOVE_MAX 1
 
 #define CASE_VECTOR_MODE QImode
+

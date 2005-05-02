@@ -1,32 +1,25 @@
-/* to be completed.... */
-enum reg_class c54x_regclass_map[FIRST_PSEUDO_REGISTER] =
-{
-//#define IMR_REGNO   0
-//#define IFR_REGNO   1
-//#define ST0_REGNO   2
-//#define ST1_REGNO   3
-//#define A_REGNO     4
-//#define B_REGNO     5
-//#define T_REGNO     6
-//#define TRN_REGNO   7
-//#define AR0_REGNO   8
-//#define AR1_REGNO   9
-//#define AR2_REGNO  10
-//#define AR3_REGNO  11
-//#define AR4_REGNO  12
-//#define AR5_REGNO  13
-//#define AR6_REGNO  14
-//#define AR7_REGNO  15
-//#define SP_REGNO   16
-//#define BK_REGNO   17
-//#define BRC_REGNO  18
-//#define RSA_REGNO  19
-//#define REA_REGNO  20
-//#define PMST_REGNO 21
-//#define XPC_REGNO  22
-//#define DP_REGNO   23
-//#define ARG_REGNO  24
-};
+enum reg_class const regclass_map[FIRST_PSEUDO_REGISTER] =
+	{
+		/* IMR		IFR		 ST0	  ST1 */
+		   IMR_REG, IFR_REG, ST0_REG, ST1_REG,
+		   
+		/* A	  B		 T		TRN */
+		   A_REG, B_REG, T_REG, TRN_REG,
+		   
+		/* AR0		AR1 */
+		   AR0_REG, AUX_REGS,
+		   
+		/* AR2			AR3			 AR4		  AR5  */
+		   DBL_OP_REGS, DBL_OP_REGS, DBL_OP_REGS, DBL_OP_REGS,
+		   
+		/* AR6 AR7	 SP		 BK		 BRC */
+		   AUX_REGS, SP_REG, BK_REG, BRC_REG,
+		   
+		/* RSA REA	PMST	  XPC	   DP	   ARG */
+		   RSA_REG, PMST_REG, XPC_REG, DP_REG, NO_REGS
+	};
+
+struct gcc_target targetm = TARGET_INITIALIZER;
 
 int
 c54x_hard_regno_mode_ok (unsigned int regno, enum machine_mode mode)
@@ -77,4 +70,11 @@ void
 function_arg_advance (CUMULATIVE_ARGS *cum, enum machine_mode mode, tree type, int named)
 {
 	cum->numarg++;
+}
+
+int
+legitimate_address_p (enum machine_mode mode, rtx addr, int strict)
+{
+	/* TODO: Fixme */
+	return 1;
 }
