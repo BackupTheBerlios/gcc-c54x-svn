@@ -20,13 +20,17 @@ extern int target_flags;
 
 #define TARGET_VERSION fprintf (stderr, " (C54x)");
 
+#define TARGET_FLOAT_FORMAT IEEE_FLOAT_FORMAT
+
+#define OVERRIDE_OPTIONS c54x_override_options()
+
 /* Node: Per-Function Data */
 
 /* Node: Storage Layout */
 #define BITS_BIG_ENDIAN         1
 #define BYTES_BIG_ENDIAN        1
 #define WORDS_BIG_ENDIAN        1
-#define FLOAT_WORDS_BIG_ENDIAN  1  /* no floats... */
+#define FLOAT_WORDS_BIG_ENDIAN  1
 #define BITS_PER_UNIT           16
 #define UNITS_PER_WORD          1
 
@@ -38,14 +42,16 @@ extern int target_flags;
 #define BIGGEST_ALIGNMENT        BITS_PER_WORD*2
 #define MINIMUM_ATOMIC_ALIGNMENT BITS_PER_WORD
 #define EMPTY_FIELD_BOUNDARY	 BITS_PER_WORD
-#define STRICT_ALIGNMENT	     1 /* Nothing is smaller than alignment.. */
-#define MAX_FIXED_MODE_SIZE     32 /* HImode, same as c4x */
+#define STRICT_ALIGNMENT	     1  /* Nothing is smaller than alignment.. */
+#define MAX_FIXED_MODE_SIZE      32 /* HImode, same as c4x */
 /* VECTOR_MODE_SUPPORTED? */
 
 /* Node: Type Layout */
+
 #define SHORT_TYPE_SIZE     BITS_PER_WORD
 #define LONG_TYPE_SIZE      (2*BITS_PER_WORD)
-#define LONG_LONG_TYPE_SIZE (4*BITS_PER_WORD)
+#define LONG_LONG_TYPE_SIZE (2*BITS_PER_WORD)
+#define FLOAT_TYPE_SIZE     (2*BITS_PER_WORD)
 
 #define SIZE_TYPE "unsigned int" /* default is too big for these */
 #define PTRDIFF_TYPE "int"
@@ -134,6 +140,8 @@ extern int target_flags;
     ((unsigned int)(REGNO) == DP_REGNO)
 #define SP_REGNO_P(REGNO) \
     ((unsigned int)(REGNO) == SP_REGNO)
+#define PSEUDO_REGNO_P(REGNO) \
+	((unsigned int)(REGNO) >= FIRST_PSEUDO_REGISTER)
 
 /* Node: Register Basics */
 

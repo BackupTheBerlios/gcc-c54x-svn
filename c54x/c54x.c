@@ -12,6 +12,7 @@
 #include "conditions.h"
 #include "output.h"
 #include "insn-codes.h"
+#include "insn-modes.h"
 #include "insn-attr.h"
 #include "flags.h"
 #include "except.h"
@@ -29,25 +30,25 @@
 #include "tree-gimple.h"
 
 enum reg_class const regclass_map[FIRST_PSEUDO_REGISTER] =
-	{
-		/* IMR		IFR		 ST0	  ST1 */
-		   IMR_REG, IFR_REG, ST0_REG, ST1_REG,
-		   
-		/* A	  B		 T		TRN */
-		   A_REG, B_REG, T_REG, TRN_REG,
-		   
-		/* AR0		AR1 */
-		   AR0_REG, AUX_REGS,
-		   
-		/* AR2			AR3			 AR4		  AR5  */
-		   DBL_OP_REGS, DBL_OP_REGS, DBL_OP_REGS, DBL_OP_REGS,
-		   
-		/* AR6 AR7	 SP		 BK		 BRC */
-		   AUX_REGS, SP_REG, BK_REG, BRC_REG,
-		   
-		/* RSA REA	PMST	  XPC	   DP	   ARG */
-		   RSA_REG, PMST_REG, XPC_REG, DP_REG, NO_REGS
-	};
+    {
+        /* IMR      IFR      ST0      ST1 */
+           IMR_REG, IFR_REG, ST0_REG, ST1_REG,
+           
+        /* A      B      T      TRN */
+           A_REG, B_REG, T_REG, TRN_REG,
+           
+        /* AR0      AR1 */
+           AR0_REG, AUX_REGS,
+           
+        /* AR2          AR3          AR4          AR5  */
+           DBL_OP_REGS, DBL_OP_REGS, DBL_OP_REGS, DBL_OP_REGS,
+           
+        /* AR6       AR7       SP      BK      BRC */
+           AUX_REGS, AUX_REGS, SP_REG, BK_REG, BRC_REG,
+           
+        /* RSA      REA      PMST      XPC      DP      ARG */
+           RSA_REG, REA_REG, PMST_REG, XPC_REG, DP_REG, NO_REGS
+    };
 
 struct gcc_target targetm = TARGET_INITIALIZER;
 
@@ -105,15 +106,32 @@ function_arg_advance (CUMULATIVE_ARGS *cum, enum machine_mode mode, tree type, i
 int
 legitimate_address_p (enum machine_mode mode, rtx addr, int strict)
 {
-	/* TODO: WriteMe */
-	return 1;
+	int valid=0;
+	
+	switch(GET_CODE(addr)) {
+	case REG:
+		valid = (AUX_REGNO_P(REGNO(addr)) || (!strict && PSEUDO_REGNO_P(REGNO(addr))));
+		break;
+	case CONST:
+	case CONST_INT:
+	case SYMBOL_REF:
+	case LABEL_REF:
+		valid = 1;
+		break;
+	case MEM:
+	default:
+		valid = 0;
+		break;
+	}
+	
+	return valid;
 }
 
 int
 c54x_legitimize_move(enum machine_mode mode, rtx op0, rtx op1)
 {
 	/* TODO: WriteMe */
-	return 1;
+	return 0;
 }
 
 void
@@ -127,4 +145,10 @@ c54x_globalize_label (FILE *stream, const char *name)
 {
 /*   default_globalize_label (stream, name); */
   /* Will need to be investigated further */
+}
+
+void
+c54x_override_options(void)
+{
+	/* May be useful in the far future */
 }
