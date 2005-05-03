@@ -105,6 +105,26 @@ function_arg_advance (CUMULATIVE_ARGS *cum, enum machine_mode mode, tree type, i
 int
 legitimate_address_p (enum machine_mode mode, rtx addr, int strict)
 {
-	/* TODO: Fixme */
+	/* TODO: WriteMe */
 	return 1;
+}
+
+int
+c54x_legitimize_move(enum machine_mode mode, rtx op0, rtx op1)
+{
+	/* TODO: WriteMe */
+	return 1;
+}
+
+void
+c54x_initialize_trampoline(rtx tramp, rtx fnaddr, rtx cxt)
+{
+	/* TODO: WriteMe */
+}
+
+void
+c54x_globalize_label (FILE *stream, const char *name)
+{
+/*   default_globalize_label (stream, name); */
+  /* Will need to be investigated further */
 }

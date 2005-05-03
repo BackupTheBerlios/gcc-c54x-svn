@@ -122,19 +122,18 @@ extern int target_flags;
 
 /* Node: Not a node */
 
-#define AUX_REGNO_P(r) \
-    ((unsigned int)(r) - AR0_REGNO <= AR7_REGNO - AR0_REGNO)
-#define ACC_REGNO_P(r) \
-    ((unsigned int)(r) - A_REGNO <= B_REGNO - A_REGNO)
-#define ST_REGNO_P(r) \
-    ((unsigned int)(r) - ST0_REGNO <= ST1_REGNO - ST0_REGNO)
-#define T_REGNO_P(r) \
-    ((r) == T_REGNO)
-#define DP_REGNO_P(r) \
-    ((r) == DP_REGNO)
-#define SP_REGNO_P(r) \
-    ((r) == SP_REGNO)
-
+#define AUX_REGNO_P(REGNO) \
+    ((unsigned int)(REGNO) - AR0_REGNO <= AR7_REGNO - AR0_REGNO)
+#define ACC_REGNO_P(REGNO) \
+    ((unsigned int)(REGNO) - A_REGNO <= B_REGNO - A_REGNO)
+#define ST_REGNO_P(REGNO) \
+    ((unsigned int)(REGNO) - ST0_REGNO <= ST1_REGNO - ST0_REGNO)
+#define T_REGNO_P(REGNO) \
+    ((unsigned int)(REGNO) == T_REGNO)
+#define DP_REGNO_P(REGNO) \
+    ((unsigned int)(REGNO) == DP_REGNO)
+#define SP_REGNO_P(REGNO) \
+    ((unsigned int)(REGNO) == SP_REGNO)
 
 /* Node: Register Basics */
 
@@ -159,6 +158,7 @@ extern int target_flags;
      1,  1,  1,  0,  0,  1,  1,  1,  1,  1,  1,   1,  1, 1 \
 }
 
+#define CONST_DOUBLE_OK_FOR_CONSTRAINT_P(VALUE, C, STR)  1
 
 /* c4x doesn't use CALL_REALLY_USED_REGISTERS */
 /* They do use CONDITIONAL_REGISTER_USAGE though; it handles things that change
@@ -275,6 +275,10 @@ enum reg_class
 
 #define INDEX_REG_CLASS AUX_REGS
 
+#define REG_OK_FOR_INDEX_P(REGNO) AUX_REGNO_P(REGNO)
+
+#define REG_OK_FOR_BASE_P(REGNO) AUX_REGNO_P(REGNO)
+
 /* Register constraint letters
  *
  * a - Accum. A
@@ -340,7 +344,6 @@ enum reg_class
  * possible. */
 #define REGNO_OK_FOR_BASE_P(n) AUX_REGNO_P(n)
 
-
 /* Same as REGNO_OK_FOR_BASE_P */
 #define REGNO_OK_FOR_INDEX_P(n) REGNO_OK_FOR_BASE_P(n)
 
@@ -350,10 +353,16 @@ enum reg_class
 /* A bunch of stuff about reloading that, as far as I know, I don't need. I very
  * well could be wrong, of course. */
 
-
 /* From c4x.h */
 #define CLASS_MAX_NREGS(CLASS, MODE)   \
     ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD)
+
+/* Ripped from c4x.h, should be fine */
+#define HARD_REGNO_NREGS(REGNO, MODE)                           \
+	(((MODE) == CCmode) ? 1 : \
+	 ((GET_MODE_SIZE(MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD))
+
+#define MODES_TIEABLE_P(MODE1, MODE2) 0
 
 /* I might need more than this, but I decdided to err on the side of minimizing
  * bloat.
@@ -390,6 +399,8 @@ extern const enum reg_class regclass_map[FIRST_PSEUDO_REGISTER];
 #define STARTING_FRAME_OFFSET -1 /* Local frame starts just below the frame pointer */
 
 #define STACK_POINTER_OFFSET -1 /* Arguments start just below SP */
+
+#define FIRST_PARM_OFFSET(FUNCDECL) 0
 
 /* Node: Exception Handling */
 /* ??? */
@@ -443,7 +454,9 @@ do { \
 } while(0);
 
 /* Node: 13.11 Trampolines for Nested Functions */
+
 #define TRAMPOLINE_SIZE 2 /* Just a guess for now */
+
 #define INITIALIZE_TRAMPOLINE(TRAMP, FNADDR, CXT) \
 	c54x_initialize_trampoline((TRAMP), (FNADDR), (CXT))
 
@@ -487,6 +500,10 @@ struct cumul_args {
 #define FUNCTION_VALUE_REGNO_P(REGNO) \
 	((REGNO) == A_REGNO)
 
+/* Node: 13.9.12 Generating Code for Profiling */
+
+#define FUNCTION_PROFILER {}
+
 /* Node: 13.13 Addressing Modes */
 
 #define MAX_REGS_PER_ADDRESS 2
@@ -519,6 +536,8 @@ do { \
     goto LABEL; \
 } while(0);
 
+#define CONSTANT_ADDRESS_P(X) (GET_CODE (X) == SYMBOL_REF)
+
 /* Node: 13.15 Describing Relative Costs of Operations */
 
 #define SLOW_BYTE_ACCESS 1
@@ -533,6 +552,29 @@ do { \
 #define ASM_APP_ON  "#APP"
 #define ASM_APP_OFF "#NO_APP"
 
+/* Node: 13.19.3 Output of Uninitialized Variables */
+
+#define ASM_OUTPUT_LOCAL(FILE, NAME, SIZE, ROUNDED)  \
+( fputs ("\t.bss\t", FILE),                     \
+  assemble_name (FILE, (NAME)),         \
+  fprintf (FILE, ",%u\n", (int)(ROUNDED)))
+
+#undef ASM_OUTPUT_COMMON
+#define ASM_OUTPUT_COMMON(FILE, NAME, SIZE, ROUNDED)  \
+(  fputs ("\t.globl\t", FILE),  \
+   assemble_name (FILE, (NAME)),        \
+   fputs ("\n\t.bss\t", FILE),  \
+   assemble_name (FILE, (NAME)),        \
+   fprintf (FILE, ",%u\n", (int)(ROUNDED)))
+
+/* Node: 13.19.4 Output and Generation of Labels */
+
+#define ASM_GENERATE_INTERNAL_LABEL(BUFFER, PREFIX, NUM) \
+	sprintf("*%s%lu?", (PREFIX), (unsigned long)(NUM))
+
+#undef TARGET_ASM_GLOBALIZE_LABEL
+#define TARGET_ASM_GLOBALIZE_LABEL c54x_globalize_label
+
 /* Node 13.19.7 Output of Assembler Instructions */
 
 #define REGISTER_NAMES { \
@@ -541,6 +583,18 @@ do { \
     "ar3", "ar4", "ar5", "ar6", "ar7", \
     "sp", "bk", "brc", "rsa", "rea", \
     "pmst", "xpc", "dp", "arg" }
+
+#define PRINT_OPERAND(STREAM, X, CODE) {}
+
+#define PRINT_OPERAND_ADDRESS(STREAM, X) {}
+
+/* Node: 13.19.10 Assembler Commands for Alignment */
+
+#define ASM_OUTPUT_ALIGN(STREAM, POWER) \
+	fprintf((STREAM), ".align %d", (POWER))
+
+#define ASM_OUTPUT_SKIP(STREAM, NBYTES) \
+	fprintf((STREAM), ".space %d", (int)(NBYTES))
 
 /* Node: 13.27 Miscellaneous Parameters */
 
@@ -552,3 +606,4 @@ do { \
 
 #define CASE_VECTOR_MODE QImode
 
+#define TRULY_NOOP_TRUNCATION(OUTPREC, INPREC) 1
