@@ -275,9 +275,9 @@ enum reg_class
 
 #define INDEX_REG_CLASS AUX_REGS
 
-#define REG_OK_FOR_INDEX_P(REGNO) AUX_REGNO_P(REGNO)
+#define REG_OK_FOR_INDEX_P(X) AUX_REGNO_P(REGNO(X))
 
-#define REG_OK_FOR_BASE_P(REGNO) AUX_REGNO_P(REGNO)
+#define REG_OK_FOR_BASE_P(X) AUX_REGNO_P(REGNO(X))
 
 /* Register constraint letters
  *
