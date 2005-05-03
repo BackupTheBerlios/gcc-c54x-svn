@@ -1,3 +1,33 @@
+#include "config.h"
+#include "system.h"
+#include "coretypes.h"
+#include "tm.h"
+#include "rtl.h"
+#include "tree.h"
+#include "tm_p.h"
+#include "regs.h"
+#include "hard-reg-set.h"
+#include "real.h"
+#include "insn-config.h"
+#include "conditions.h"
+#include "output.h"
+#include "insn-codes.h"
+#include "insn-attr.h"
+#include "flags.h"
+#include "except.h"
+#include "function.h"
+#include "recog.h"
+#include "expr.h"
+#include "optabs.h"
+#include "toplev.h"
+#include "basic-block.h"
+#include "ggc.h"
+#include "target.h"
+#include "target-def.h"
+#include "langhooks.h"
+#include "cgraph.h"
+#include "tree-gimple.h"
+
 enum reg_class const regclass_map[FIRST_PSEUDO_REGISTER] =
 	{
 		/* IMR		IFR		 ST0	  ST1 */
@@ -49,7 +79,7 @@ init_cumulative_args (CUMULATIVE_ARGS *cum, tree fntype, rtx libname, tree fndec
 		next_param = TREE_CHAIN (param);
 		if (next_param == 0 && TREE_VALUE (param) != void_type_node) {
 			/* If the last parameter is not of type void_type_node, we have a variadic function */
-			cum->has_vaargs = true;
+			cum->has_varargs = true;
 		}
 	}
 }

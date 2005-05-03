@@ -122,17 +122,17 @@ extern int target_flags;
 
 /* Node: Not a node */
 
-#define AUX_REGNO_P (r) \
+#define AUX_REGNO_P(r) \
     ((unsigned int)(r) - AR0_REGNO <= AR7_REGNO - AR0_REGNO)
-#define ACC_REGNO_P (r) \
+#define ACC_REGNO_P(r) \
     ((unsigned int)(r) - A_REGNO <= B_REGNO - A_REGNO)
-#define ST_REGNO_P (r) \
+#define ST_REGNO_P(r) \
     ((unsigned int)(r) - ST0_REGNO <= ST1_REGNO - ST0_REGNO)
-#define T_REGNO_P (r) \
+#define T_REGNO_P(r) \
     ((r) == T_REGNO)
-#define DP_REGNO_P (r) \
+#define DP_REGNO_P(r) \
     ((r) == DP_REGNO)
-#define SP_REGNO_P (r) \
+#define SP_REGNO_P(r) \
     ((r) == SP_REGNO)
 
 
@@ -342,7 +342,7 @@ enum reg_class
 
 
 /* Same as REGNO_OK_FOR_BASE_P */
-#define REGNO_OK_FOR_INDEX_P(n) REGNO_OK_FOR_BASE_P (n)
+#define REGNO_OK_FOR_INDEX_P(n) REGNO_OK_FOR_BASE_P(n)
 
 /* This will work, but might not be optimal */
 #define PREFERRED_RELOAD_CLASS(x, CLASS) CLASS
@@ -507,14 +507,40 @@ do {                                                                    \
 } while (0)
 #endif
 
+/* Ripped from c4x, should be ok */
+#define GO_IF_MODE_DEPENDENT_ADDRESS(ADDR, LABEL) \
+do { \
+  if (GET_CODE (ADDR) == PRE_DEC        \
+      || GET_CODE (ADDR) == POST_DEC    \
+      || GET_CODE (ADDR) == PRE_INC     \
+      || GET_CODE (ADDR) == POST_INC    \
+      || GET_CODE (ADDR) == POST_MODIFY \
+      || GET_CODE (ADDR) == PRE_MODIFY) \
+    goto LABEL; \
+} while(0);
+
 /* Node: 13.15 Describing Relative Costs of Operations */
 
 #define SLOW_BYTE_ACCESS 1
+
+/* Node: 13.17 Dividing the Output into Sections (Texts, Data, ...) */
+
+#define TEXT_SECTION_ASM_OP ".text"
+#define DATA_SECTION_ASM_OP ".data"
 
 /* Node: 13.19.1 The Overall Framework of an Assembler File */
 
 #define ASM_APP_ON  "#APP"
 #define ASM_APP_OFF "#NO_APP"
+
+/* Node 13.19.7 Output of Assembler Instructions */
+
+#define REGISTER_NAMES { \
+    "imr", "ifr", "st0", "st1", \
+    "a", "b",  "t", "trn", "ar0", "ar1", "ar2", \
+    "ar3", "ar4", "ar5", "ar6", "ar7", \
+    "sp", "bk", "brc", "rsa", "rea", \
+    "pmst", "xpc", "dp", "arg" }
 
 /* Node: 13.27 Miscellaneous Parameters */
 
