@@ -35,7 +35,7 @@ diff -u -r1.516.2.8 config.gcc
  	c_target_objs="c4x-c.o"
  	cxx_target_objs="c4x-c.o"
  	;;
-+c54x-* | tic54x-*
++c54x-* | tic54x-*)
 +	;;
  cris-*-aout)
  	tm_file="dbxelf.h ${tm_file} cris/aout.h"
