@@ -142,6 +142,8 @@ extern int target_flags;
     ((unsigned int)(REGNO) == SP_REGNO)
 #define PSEUDO_REGNO_P(REGNO) \
 	((unsigned int)(REGNO) >= FIRST_PSEUDO_REGISTER)
+#define XMEM_REGNO_P(REGNO) \
+    ((unsigned int)(REGNO) - AR2_REGNO <= AR5_REGNO - AR2_REGNO)
 
 /* Node: Register Basics */
 
@@ -321,6 +323,13 @@ enum reg_class
  * K - 4 bit unsigned int
  * L - 5 bit int
  * M - 9 bit int
+ * O - 8 bit int
+ *
+ * Memory constraints
+ *
+ * Y - Xmem memory operand
+ * S - Smem memory operand
+ * T - Smem memory operand (write only)
  */
 
 #define REG_CLASS_FROM_LETTER(c)  \
@@ -378,12 +387,13 @@ enum reg_class
 #define IN_RANGE_P(val, bottom, top) \
     (bottom <= val && val <= top)
 
-#define CONST_OK_FOR_LETTER_P(value, c)               \
+#define CONST_OK_FOR_LETTER_P(value, c)                \
     ( ((c) == 'I') ? IN_RANGE_P (value, -32768, 32767) \
     : ((c) == 'J') ? IN_RANGE_P (value, 0, 7)          \
     : ((c) == 'K') ? IN_RANGE_P (value, 0, 15)         \
     : ((c) == 'L') ? IN_RANGE_P (value, -16, 15)       \
     : ((c) == 'M') ? IN_RANGE_P (value, 0, 511)        \
+    : ((c) == 'O') ? IN_RANGE_P (value, -128, 127)     \
     : 0 )
 
 extern const enum reg_class regclass_map[FIRST_PSEUDO_REGISTER];
@@ -392,6 +402,12 @@ extern const enum reg_class regclass_map[FIRST_PSEUDO_REGISTER];
 
 /* EXTRA_CONSTRAINT will probably come in useful, but it isn't required so I'll
  * do it later. */
+
+#define EXTRA_CONSTRAINT(VALUE, C) \
+	( ((C) == 'Y') ? c54x_xmem_p((VALUE), (C)) : 0 )
+/* 	: ((C) == 'S') ? c54x_smem_p((VALUE), (C)) \ */
+/* 	: ((C) == 'T') ? c54x_smem_p((VALUE), (C)) \	 */
+/* 	: 0 ) */
 
 /* Node: Frame Layout */
 /* http://focus.ti.com/lit/ug/spru103g/spru103g.pdf Explains a great deal about the ABI and frame layout */
@@ -531,6 +547,10 @@ do {                                                                    \
     goto ADDR;                                                          \
 } while (0)
 #endif
+
+#define HAVE_POST_DECREMENT 1
+
+#define HAVE_POST_INCREMENT 1
 
 /* Ripped from c4x, should be ok */
 #define GO_IF_MODE_DEPENDENT_ADDRESS(ADDR, LABEL) \

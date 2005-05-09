@@ -118,11 +118,12 @@ legitimate_address_p (enum machine_mode mode, rtx addr, int strict)
 	case LABEL_REF:
 		valid = 1;
 		break;
-	case MEM:
 	default:
-		valid = 0;
 		break;
 	}
+	
+	print_rtl(stderr, addr);
+	fprintf(stderr, " valid: %s, strict: %s\n", (valid ? "yes" : "no"), (strict ? "yes" : "no" ));
 	
 	return valid;
 }
@@ -151,4 +152,30 @@ void
 c54x_override_options(void)
 {
 	/* May be useful in the far future */
+}
+
+int
+c54x_xmem_p(rtx addr, char letter)
+{
+	int valid = 0;
+
+	/* Are we getting operands wrapped around a
+	   (mem:M (addr)) or just the addr ?
+	   Stay tuned to the output below to find out */
+	print_rtl(stderr, addr);
+	fprintf(stderr, "\n");
+
+	switch(GET_CODE(addr)) {
+	case POST_INC:
+	case POST_DEC:
+		valid = XMEM_REGNO_P(REGNO(XEXP(addr, 0)));
+		break;
+	case REG:
+		valid = XMEM_REGNO_P(REGNO(addr));
+		break;
+	default:
+		break;
+	}
+
+	return valid;
 }
