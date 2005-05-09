@@ -116,6 +116,9 @@ legitimate_address_p (enum machine_mode mode, rtx addr, int strict)
 	case CONST_INT:
 	case SYMBOL_REF:
 	case LABEL_REF:
+	case POST_DEC:
+	case POST_INC:
+	case PRE_INC:
 		valid = 1;
 		break;
 	default:
@@ -155,15 +158,15 @@ c54x_override_options(void)
 }
 
 int
-c54x_xmem_p(rtx addr, char letter)
+c54x_xmem_p(rtx value, char letter)
 {
 	int valid = 0;
+	rtx addr;
 
-	/* Are we getting operands wrapped around a
-	   (mem:M (addr)) or just the addr ?
-	   Stay tuned to the output below to find out */
-	print_rtl(stderr, addr);
-	fprintf(stderr, ": Xmem\n");
+	if(GET_CODE(value) != MEM)
+		return valid;
+
+	addr = XEXP(value, 0);
 
 	switch(GET_CODE(addr)) {
 	case POST_INC:
@@ -177,19 +180,24 @@ c54x_xmem_p(rtx addr, char letter)
 		break;
 	}
 
+	if(valid) {
+		print_rtl(stderr, addr);
+		fprintf(stderr, ": Xmem\n");
+	}
+
 	return valid;
 }
 
 int
-c54x_smem_p(rtx addr, char letter)
+c54x_smem_p(rtx value, char letter)
 {
 	int valid = 0;
+	rtx addr;
 
-	/* Are we getting operands wrapped around a
-	   (mem:M (addr)) or just the addr ?
-	   Stay tuned to the output below to find out */
-	print_rtl(stderr, addr);
-	fprintf(stderr, ": Smem\n");
+	if(GET_CODE(value) != MEM)
+		return valid;
+
+	addr = XEXP(value, 0);
 
 	switch(GET_CODE(addr)) {
 	case POST_INC:
@@ -211,23 +219,62 @@ c54x_smem_p(rtx addr, char letter)
 		break;
 	}
 
+	if(!valid) {
+		print_rtl(stderr, addr);
+		fprintf(stderr, ": Smem\n");
+	}
+
 	return valid;
 }
 
 int
-c54x_dmad_p(rtx addr, char letter)
+c54x_dmad_p(rtx value, char letter)
 {
 	int valid = 0;
+	rtx addr;
+
+	if(GET_CODE(value) != MEM)
+		return valid;
+
+	addr = XEXP(value, 0);
 
 	switch(GET_CODE(addr)) {
 	case CONST:
 	case CONST_INT:
 	case SYMBOL_REF:
 		valid = 1;
-		break
+		break;
 	default:
 		break;
 	}
+	
+	if(valid) {
+		print_rtl(stderr, addr);
+		fprintf(stderr, ": dmad\n");
+	}
 
 	return valid;
+}
+
+void
+c54x_print_operand(FILE *stream, rtx op, char letter)
+{
+
+	switch(GET_CODE(op)) {
+	case REG:
+		fprintf(stream, "%s", reg_names[REGNO(op)]);
+		break;
+	case CONST_INT:
+		fprintf(stream, "#%xh", XINT(op, 0));
+		break;
+	default:
+		print_rtl(stream, op);
+		break;
+	}
+}
+
+void
+c54x_print_operand_address(FILE *stream, rtx addr)
+{
+	print_rtl(stream, addr);
 }

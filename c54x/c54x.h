@@ -614,9 +614,9 @@ do { \
     "sp", "bk", "brc", "rsa", "rea", \
     "pmst", "xpc", "dp", "arg" }
 
-#define PRINT_OPERAND(STREAM, X, CODE) {}
+#define PRINT_OPERAND(STREAM, X, CODE) c54x_print_operand((STREAM), (X), (CODE))
 
-#define PRINT_OPERAND_ADDRESS(STREAM, X) {}
+#define PRINT_OPERAND_ADDRESS(STREAM, X) c54x_print_operand_address((STREAM), (X))
 
 /* Node: 13.19.10 Assembler Commands for Alignment */
 
