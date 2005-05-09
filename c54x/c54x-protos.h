@@ -9,3 +9,4 @@ extern void c54x_globalize_label(FILE*, const char*);
 extern void c54x_override_options(void);
 extern int  c54x_xmem_p(rtx, char);
 extern int  c54x_smem_p(rtx, char);
+extern int  c54x_dmad_p(rtx, char);

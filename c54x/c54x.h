@@ -330,6 +330,7 @@ enum reg_class
  * Y - Xmem memory operand
  * S - Smem memory operand
  * T - Smem memory operand (write only)
+ * U - dmad memory operand
  */
 
 #define REG_CLASS_FROM_LETTER(c)  \
@@ -404,10 +405,11 @@ extern const enum reg_class regclass_map[FIRST_PSEUDO_REGISTER];
 	( ((C) == 'Y') ? c54x_xmem_p((VALUE), (C)) \
 	: ((C) == 'S') ? c54x_smem_p((VALUE), (C)) \
 	: ((C) == 'T') ? c54x_smem_p((VALUE), (C)) \
+	: ((C) == 'U') ? c54x_dmad_p((VALUE), (C)) \
 	: 0 )
 
 #define EXTRA_MEMORY_CONSTRAINT(C, STR) \
-	( (C) == 'Y' || (C) == 'S' || (C == 'T') )
+	( (C) == 'Y' || (C) == 'S' || (C == 'T') || (C == 'U') )
 
 /* Node: Frame Layout */
 /* http://focus.ti.com/lit/ug/spru103g/spru103g.pdf Explains a great deal about the ABI and frame layout */

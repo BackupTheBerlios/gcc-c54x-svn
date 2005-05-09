@@ -211,5 +211,23 @@ c54x_smem_p(rtx addr, char letter)
 		break;
 	}
 
-	return valid
+	return valid;
+}
+
+int
+c54x_dmad_p(rtx addr, char letter)
+{
+	int valid = 0;
+
+	switch(GET_CODE(addr)) {
+	case CONST:
+	case CONST_INT:
+	case SYMBOL_REF:
+		valid = 1;
+		break
+	default:
+		break;
+	}
+
+	return valid;
 }
