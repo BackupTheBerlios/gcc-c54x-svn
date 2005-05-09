@@ -400,14 +400,14 @@ extern const enum reg_class regclass_map[FIRST_PSEUDO_REGISTER];
 
 #define REGNO_REG_CLASS(REGNO) (regclass_map[REGNO])
 
-/* EXTRA_CONSTRAINT will probably come in useful, but it isn't required so I'll
- * do it later. */
-
 #define EXTRA_CONSTRAINT(VALUE, C) \
-	( ((C) == 'Y') ? c54x_xmem_p((VALUE), (C)) : 0 )
-/* 	: ((C) == 'S') ? c54x_smem_p((VALUE), (C)) \ */
-/* 	: ((C) == 'T') ? c54x_smem_p((VALUE), (C)) \	 */
-/* 	: 0 ) */
+	( ((C) == 'Y') ? c54x_xmem_p((VALUE), (C)) \
+	: ((C) == 'S') ? c54x_smem_p((VALUE), (C)) \
+	: ((C) == 'T') ? c54x_smem_p((VALUE), (C)) \
+	: 0 )
+
+#define EXTRA_MEMORY_CONSTRAINT(C, STR) \
+	( (C) == 'Y' || (C) == 'S' || (C == 'T') )
 
 /* Node: Frame Layout */
 /* http://focus.ti.com/lit/ug/spru103g/spru103g.pdf Explains a great deal about the ABI and frame layout */

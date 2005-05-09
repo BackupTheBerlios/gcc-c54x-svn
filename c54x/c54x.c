@@ -163,7 +163,7 @@ c54x_xmem_p(rtx addr, char letter)
 	   (mem:M (addr)) or just the addr ?
 	   Stay tuned to the output below to find out */
 	print_rtl(stderr, addr);
-	fprintf(stderr, "\n");
+	fprintf(stderr, ": Xmem\n");
 
 	switch(GET_CODE(addr)) {
 	case POST_INC:
@@ -178,4 +178,38 @@ c54x_xmem_p(rtx addr, char letter)
 	}
 
 	return valid;
+}
+
+int
+c54x_smem_p(rtx addr, char letter)
+{
+	int valid = 0;
+
+	/* Are we getting operands wrapped around a
+	   (mem:M (addr)) or just the addr ?
+	   Stay tuned to the output below to find out */
+	print_rtl(stderr, addr);
+	fprintf(stderr, ": Smem\n");
+
+	switch(GET_CODE(addr)) {
+	case POST_INC:
+	case POST_DEC:
+		valid = AUX_REGNO_P(REGNO(XEXP(addr, 0)));
+		break;
+	case PRE_INC:
+		/* Allowed only on a write operand */
+		valid = AUX_REGNO_P(REGNO(XEXP(addr, 0))) && letter == 'T';
+		break;
+	case REG:
+		valid = AUX_REGNO_P(REGNO(addr));
+		break;
+	case CONST:
+	case CONST_INT:
+	case SYMBOL_REF:
+		valid = 1;
+	default:
+		break;
+	}
+
+	return valid
 }
