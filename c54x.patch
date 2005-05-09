@@ -1,11 +1,11 @@
 Index: configure.in
 ===================================================================
 RCS file: /cvsroot/gcc/gcc/configure.in,v
-retrieving revision 1.341.2.2
-diff -u -r1.341.2.2 configure.in
---- configure.in	21 Apr 2005 02:45:11 -0000	1.341.2.2
-+++ configure.in	27 Apr 2005 16:42:23 -0000
-@@ -495,7 +495,7 @@
+retrieving revision 1.349
+diff -u -r1.349 configure.in
+--- configure.in	5 May 2005 00:59:21 -0000	1.349
++++ configure.in	9 May 2005 15:06:59 -0000
+@@ -478,7 +478,7 @@
      noconfigdirs="$noconfigdirs target-libstdc++-v3 target-libgloss ${libgcj}"
      ;;
    c54x*-*-* | tic54x-*-*)
@@ -13,15 +13,15 @@ diff -u -r1.341.2.2 configure.in
 +    noconfigdirs="$noconfigdirs target-libstdc++-v3 target-libgloss ${libgcj} gdb newlib"
      ;;
    cris-*-* | crisv32-*-*)
-     case "${target}" in
+     libgcj_ex_libffi=`echo ${libgcj} | sed -e 's/target-libffi//'`
 Index: gcc/config.gcc
 ===================================================================
 RCS file: /cvsroot/gcc/gcc/gcc/config.gcc,v
-retrieving revision 1.516.2.8
-diff -u -r1.516.2.8 config.gcc
---- gcc/config.gcc	25 Apr 2005 10:40:04 -0000	1.516.2.8
-+++ gcc/config.gcc	27 Apr 2005 16:42:24 -0000
-@@ -319,6 +319,9 @@
+retrieving revision 1.544
+diff -u -r1.544 config.gcc
+--- gcc/config.gcc	7 May 2005 18:51:39 -0000	1.544
++++ gcc/config.gcc	9 May 2005 15:07:00 -0000
+@@ -322,6 +322,9 @@
  tic4x-*-*)
          cpu_type=c4x
          ;;
@@ -31,7 +31,7 @@ diff -u -r1.516.2.8 config.gcc
  esac
  
  tm_file=${cpu_type}/${cpu_type}.h
-@@ -747,6 +750,8 @@
+@@ -757,6 +760,8 @@
  	c_target_objs="c4x-c.o"
  	cxx_target_objs="c4x-c.o"
  	;;
