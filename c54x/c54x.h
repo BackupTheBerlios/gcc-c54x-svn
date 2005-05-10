@@ -376,9 +376,8 @@ enum reg_class
     ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD)
 
 /* Ripped from c4x.h, should be fine */
-#define HARD_REGNO_NREGS(REGNO, MODE)                           \
-	(((MODE) == CCmode) ? 1 : \
-	 ((GET_MODE_SIZE(MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD))
+#define HARD_REGNO_NREGS(REGNO, MODE) \
+	((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD)
 
 #define MODES_TIEABLE_P(MODE1, MODE2) 0
 
@@ -574,8 +573,8 @@ do { \
 
 /* Node: 13.17 Dividing the Output into Sections (Texts, Data, ...) */
 
-#define TEXT_SECTION_ASM_OP ".text"
-#define DATA_SECTION_ASM_OP ".data"
+#define TEXT_SECTION_ASM_OP "\t.sect .text"
+#define DATA_SECTION_ASM_OP "\t.data"
 
 /* Node: 13.19.1 The Overall Framework of an Assembler File */
 

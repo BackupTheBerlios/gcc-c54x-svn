@@ -259,13 +259,26 @@ c54x_dmad_p(rtx value, char letter)
 void
 c54x_print_operand(FILE *stream, rtx op, char letter)
 {
-
+	rtx mem;
+	
 	switch(GET_CODE(op)) {
 	case REG:
 		fprintf(stream, "%s", reg_names[REGNO(op)]);
 		break;
 	case CONST_INT:
 		fprintf(stream, "#%xh", XINT(op, 0));
+		break;
+	case MEM:
+		mem = XEXP(op, 0);
+		switch(GET_CODE(mem)) {
+		case LABEL_REF:
+		case SYMBOL_REF:
+			fprintf(stream, "%s", XSTR(mem, 0));
+			break;
+		default:
+			print_rtl(stream, mem);
+			break;
+		}
 		break;
 	default:
 		print_rtl(stream, op);
@@ -276,5 +289,15 @@ c54x_print_operand(FILE *stream, rtx op, char letter)
 void
 c54x_print_operand_address(FILE *stream, rtx addr)
 {
-	print_rtl(stream, addr);
+	rtx value = XEXP(addr, 0);
+
+	switch(GET_CODE(value)) {
+	case SYMBOL_REF:
+	case LABEL_REF:
+		fprintf(stream, "%s", XSTR(value, 0));
+		break;
+	default:
+		print_rtl(stream, value);
+		break;
+	}
 }
