@@ -1,0 +1,48 @@
+ GCC Port for the Texas Instruments TMS320C54x
+===============================================
+
+How to install:
+
+0. Note: Always build binutils and gcc in a separate directory.
+   It is assumed that you have already checked-out the code for this project.
+
+1. Install a recent binutils:
+
+$ cd binutils-build
+$ ../binutils-<version>/configure --prefix=<prefix> --target=c54x --disable-nls
+$ make
+$ make install
+
+* Include <prefix>/bin in the PATH, so that gcc can find it.
+
+2. Checkout a fresh copy of gcc.
+   http://gcc.gnu.org/cvs.html explains how to do this.
+
+3. Prepare the GCC tree for compilation with the port
+
+$ cd <gcc>
+$ patch -p0 -i <path>/gcc-c54x/c54x.patch
+$ autoreconf
+$ cd gcc/config
+$ ln -s <path>/gcc-c54x/c54x .
+
+4. Build GCC
+
+$ cd gccbuild
+$ ../gcc/configure --prefix=<prefix> --target=c54x --enable-languages=c --disable-nls
+$ make
+
+* Make _will_ fail at some point. If you did this right, you will have
+  a cc1 and a xgcc binary in the gcc subdir in the build directory.
+
+5. Make a symbolic link so that xgcc will be able to find the cc1 binary
+
+$ cd <prefix>/libexec/gcc/c54x
+$ ln -s <gccbuild>/gcc/cc1 .
+
+6. You should now be able to invoke xgcc like a "normal" compiler
+
+$ <gccbuild>/gcc/xgcc -daAp -s test.c
+
+* The -daAp tells the compiler to produce RTL dumps at various stages
+  of the compilation, the -s flags tells it to dump an assembly dump.
