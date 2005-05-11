@@ -275,12 +275,17 @@ c54x_print_operand(FILE *stream, rtx op, char letter)
 		case SYMBOL_REF:
 			fprintf(stream, "%s", XSTR(mem, 0));
 			break;
+		case REG:
+			fprintf(stream, "*%s", reg_names[REGNO(mem)]);
+			break;
 		default:
+			fprintf(stream, "mem:");
 			print_rtl(stream, mem);
 			break;
 		}
 		break;
 	default:
+		fprintf(stream, "op:");
 		print_rtl(stream, op);
 		break;
 	}
@@ -297,6 +302,7 @@ c54x_print_operand_address(FILE *stream, rtx addr)
 		fprintf(stream, "%s", XSTR(value, 0));
 		break;
 	default:
+		fprintf(stream, "addr:");
 		print_rtl(stream, value);
 		break;
 	}
