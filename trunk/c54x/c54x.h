@@ -277,7 +277,7 @@ enum reg_class
     {0x0020000c}, /* STAT_REGS */ \
     {0x00000030}, /* ACC_REGS */ \
     {0x001c0000}, /* BR_REGS */ \
-    {0x001efff0}, /* GENERAL_REGS */ \
+    {0x011efff0}, /* GENERAL_REGS */ \
     {0xFFFFFFFF}  /* ALL_REGS */ \
 }
 

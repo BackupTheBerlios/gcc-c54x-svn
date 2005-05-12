@@ -47,7 +47,7 @@ enum reg_class const regclass_map[FIRST_PSEUDO_REGISTER] =
            AUX_REGS, AUX_REGS, SP_REG, BK_REG, BRC_REG,
            
         /* RSA      REA      PMST      XPC      DP      ARG */
-           RSA_REG, REA_REG, PMST_REG, XPC_REG, DP_REG, NO_REGS
+           RSA_REG, REA_REG, PMST_REG, XPC_REG, DP_REG, GENERAL_REGS
     };
 
 struct gcc_target targetm = TARGET_INITIALIZER;
