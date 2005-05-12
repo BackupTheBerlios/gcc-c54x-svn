@@ -1,4 +1,0 @@
-FLOAT_MODE (QF, 1, ieee_single_format);
-FLOAT_MODE (HF, 2, ieee_double_format);
-RESET_FLOAT_FORMAT (SF, 0);  /* not used */
-RESET_FLOAT_FORMAT (DF, 0);  /* not used */
