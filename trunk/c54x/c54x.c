@@ -55,17 +55,25 @@ struct gcc_target targetm = TARGET_INITIALIZER;
 int
 c54x_hard_regno_mode_ok (unsigned int regno, enum machine_mode mode)
 {
+	int valid;
 	switch(mode) {
 	case QImode:
-		return (AUX_REGNO_P(regno) || ACC_REGNO_P(regno)
-				|| SP_REGNO_P(regno) || T_REGNO_P(regno));
+		valid =  (AUX_REGNO_P(regno) || ACC_REGNO_P(regno)
+				  || SP_REGNO_P(regno) || T_REGNO_P(regno));
+		break;
+	case PSImode:
 	case HImode:
-		return (ACC_REGNO_P(regno));
+		valid = ACC_REGNO_P(regno);
+		break;
 	case CCmode:
-		return (ST_REGNO_P(regno));
+		valid = ST_REGNO_P(regno);
+		break;
 	default:
-		return 0;
+		valid =  0;
+		break;
 	}
+
+	return valid:
 }
 
 void

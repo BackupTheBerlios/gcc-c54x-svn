@@ -599,7 +599,7 @@ do { \
 /* Node: 13.19.4 Output and Generation of Labels */
 
 #define ASM_GENERATE_INTERNAL_LABEL(BUFFER, PREFIX, NUM) \
-	sprintf("*%s%lu?", (PREFIX), (unsigned long)(NUM))
+	sprintf((BUFFER), "*%s%lu?", (PREFIX), (unsigned long)(NUM))
 
 #undef TARGET_ASM_GLOBALIZE_LABEL
 #define TARGET_ASM_GLOBALIZE_LABEL c54x_globalize_label
