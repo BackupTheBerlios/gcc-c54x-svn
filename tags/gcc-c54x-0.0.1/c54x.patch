@@ -1,0 +1,42 @@
+Index: configure.in
+===================================================================
+RCS file: /cvsroot/gcc/gcc/configure.in,v
+retrieving revision 1.349
+diff -u -r1.349 configure.in
+--- configure.in	5 May 2005 00:59:21 -0000	1.349
++++ configure.in	9 May 2005 15:06:59 -0000
+@@ -478,7 +478,7 @@
+     noconfigdirs="$noconfigdirs target-libstdc++-v3 target-libgloss ${libgcj}"
+     ;;
+   c54x*-*-* | tic54x-*-*)
+-    noconfigdirs="$noconfigdirs target-libstdc++-v3 target-libgloss ${libgcj} gcc gdb newlib"
++    noconfigdirs="$noconfigdirs target-libstdc++-v3 target-libgloss ${libgcj} gdb newlib"
+     ;;
+   cris-*-* | crisv32-*-*)
+     libgcj_ex_libffi=`echo ${libgcj} | sed -e 's/target-libffi//'`
+Index: gcc/config.gcc
+===================================================================
+RCS file: /cvsroot/gcc/gcc/gcc/config.gcc,v
+retrieving revision 1.544
+diff -u -r1.544 config.gcc
+--- gcc/config.gcc	7 May 2005 18:51:39 -0000	1.544
++++ gcc/config.gcc	9 May 2005 15:07:00 -0000
+@@ -322,6 +322,9 @@
+ tic4x-*-*)
+         cpu_type=c4x
+         ;;
++tic54x-*-*)
++        cpu_type=c54x
++        ;;
+ esac
+ 
+ tm_file=${cpu_type}/${cpu_type}.h
+@@ -757,6 +760,8 @@
+ 	c_target_objs="c4x-c.o"
+ 	cxx_target_objs="c4x-c.o"
+ 	;;
++c54x-* | tic54x-*)
++	;;
+ cris-*-aout)
+ 	tm_file="dbxelf.h ${tm_file} cris/aout.h"
+ 	gas=yes
