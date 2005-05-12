@@ -266,7 +266,7 @@ c54x_print_operand(FILE *stream, rtx op, char letter)
 		fprintf(stream, "%s", reg_names[REGNO(op)]);
 		break;
 	case CONST_INT:
-		fprintf(stream, "#%xh", XINT(op, 0));
+		fprintf(stream, "#%d", XINT(op, 0));
 		break;
 	case MEM:
 		mem = XEXP(op, 0);
