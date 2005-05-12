@@ -77,6 +77,7 @@ int
 c54x_hard_regno_mode_ok (unsigned int regno, enum machine_mode mode)
 {
 	int valid;
+
 	switch(mode) {
 	case QImode:
 		valid =  (AUX_REGNO_P(regno) || ACC_REGNO_P(regno)
@@ -94,7 +95,7 @@ c54x_hard_regno_mode_ok (unsigned int regno, enum machine_mode mode)
 		break;
 	}
 
-	return valid:
+	return valid;
 }
 
 void
