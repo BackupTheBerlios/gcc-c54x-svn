@@ -56,7 +56,7 @@ enum reg_class const regclass_map[FIRST_PSEUDO_REGISTER] =
            IMR_REG, IFR_REG, ST0_REG, ST1_REG,
            
         /* A      B      T      TRN */
-           A_REG, B_REG, T_REG, TRN_REG,
+           ACC_REGS, ACC_REGS, T_REG, TRN_REG,
            
         /* AR0      AR1 */
            AR0_REG, AUX_REGS,

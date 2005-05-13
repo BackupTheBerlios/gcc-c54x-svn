@@ -243,6 +243,7 @@ enum reg_class
     STAT_REGS,
     ACC_REGS,
     BR_REGS,
+    MMR_REGS,
     GENERAL_REGS,
     ALL_REGS,
     LIM_REG_CLASSES
@@ -276,6 +277,7 @@ enum reg_class
     "STAT_REGS",        \
     "ACC_REGS",         \
     "BR_REGS",          \
+    "MMR_REGS",         \
     "GENERAL_REGS",     \
     "ALL_REGS",         \
 }
@@ -307,6 +309,7 @@ enum reg_class
     {0x0020000c}, /* STAT_REGS */ \
     {0x00000030}, /* ACC_REGS */ \
     {0x001c0000}, /* BR_REGS */ \
+    {0x007fffcf}, /* MMR_REGS */ \
     {0x011efff0}, /* GENERAL_REGS */ \
     {0xFFFFFFFF}  /* ALL_REGS */ \
 }
@@ -345,6 +348,7 @@ enum reg_class
  * w - DP reg
  * x - XPC reg
  * y - DBL_OP_REGS
+ * z - MMR_REGS
  *
  * Integer range constraints
  *
@@ -385,6 +389,7 @@ enum reg_class
     : ((c) == 'w') ? DP_REG        \
     : ((c) == 'x') ? XPC_REG       \
     : ((c) == 'y') ? DBL_OP_REGS   \
+    : ((c) == 'z') ? MMR_REGS      \
     : NO_REGS )
 
 /* Oohh one of those seemingly overlapping macros.
@@ -507,6 +512,8 @@ do { \
         (OFFSET) = offset; \
 	} \
 } while(0);
+
+#define SMALL_REGISTER_CLASSES 1
 
 /* Node: 13.11 Trampolines for Nested Functions */
 
