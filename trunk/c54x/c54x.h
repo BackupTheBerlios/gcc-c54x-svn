@@ -166,6 +166,15 @@ extern int target_flags;
 #define XMEM_REGNO_P(REGNO) \
     ((unsigned int)(REGNO) - AR2_REGNO <= AR5_REGNO - AR2_REGNO)
 
+#define AUX_REG_P(X)    (AUX_REGNO_P(REGNO(X)))
+#define ACC_REG_P(X)    (ACC_REGNO_P(REGNO(X)))
+#define ST_REG_P(X)     (ST_REGNO_P(REGNO(X)))
+#define T_REG_P(X)      (T_REGNO_P(REGNO(X)))
+#define DP_REG_P(X)     (DP_REGNO_P(REGNO(X)))
+#define SP_REG_P(X)     (SP_REGNO_P(REGNO(X)))
+#define PSEUDO_REG_P(X) (PSEUDO_REGNO_P(REGNO(X)))
+#define XMEM_REG_P(X)   (XMEM_REGNO_P(REGNO(X)))
+
 /* Node: Register Basics */
 
 /* number of registers */
@@ -344,7 +353,7 @@ enum reg_class
  * K - 4 bit unsigned int
  * L - 5 bit int
  * M - 9 bit int
- * O - 8 bit int
+ * O - 8 bit unsigned int
  *
  * Memory constraints
  *
@@ -414,7 +423,7 @@ enum reg_class
     : ((c) == 'K') ? IN_RANGE_P (value, 0, 15)         \
     : ((c) == 'L') ? IN_RANGE_P (value, -16, 15)       \
     : ((c) == 'M') ? IN_RANGE_P (value, 0, 511)        \
-    : ((c) == 'O') ? IN_RANGE_P (value, -128, 127)     \
+    : ((c) == 'O') ? IN_RANGE_P (value, 0, 255)     \
     : 0 )
 
 extern const enum reg_class regclass_map[FIRST_PSEUDO_REGISTER];
