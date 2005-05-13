@@ -212,7 +212,7 @@ extern int target_flags;
 /* Ripped from c4x.h, should be fine */
 #define HARD_REGNO_NREGS(REGNO, MODE) \
     ( (ACC_REGNO_P( REGNO )) ? 1 /* accumulators hold anything */  \
-    : ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD) 
+    : ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD) ) 
 
 #define HARD_REGNO_MODE_OK(REGNO, MODE) c54x_hard_regno_mode_ok(REGNO, MODE)
 
