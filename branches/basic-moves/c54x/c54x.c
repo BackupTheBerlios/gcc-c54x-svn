@@ -49,6 +49,7 @@ Boston, MA 02111-1307, USA.  */
 #include "langhooks.h"
 #include "cgraph.h"
 #include "tree-gimple.h"
+#include "emit-rtl.h"
 
 enum reg_class const regclass_map[FIRST_PSEUDO_REGISTER] =
     {
@@ -162,10 +163,22 @@ legitimate_address_p (enum machine_mode mode, rtx addr, int strict)
 }
 
 int
-c54x_legitimize_move(enum machine_mode mode, rtx op0, rtx op1)
+c54x_expand_movqi(rtx ops[])
 {
-	/* TODO: WriteMe */
-	return 0;
+	int done = 0;
+	
+	if(ACC_REG_P(ops[0])&& REG_P(ops[1])) {
+		ops[0] = copy_rtx(ops[0]);
+		PUT_MODE(ops[0], PSImode);
+		emit_insn(gen_ldm(ops[0], ops[1]));
+		done = 1;
+	} else if(REG_P(ops[0]) && MEM_P(ops[1])) {
+		ops[0] = copy_rtx(ops[0]);
+		PUT_MODE(ops[0], PSImode);
+		emit_insn(gen_ldu(ops[0], ops[1]));
+		done = 1;
+	}
+	return done;
 }
 
 void

@@ -197,9 +197,6 @@ extern int target_flags;
      1,  1,  1,  0,  0,  1,  1,  1,  1,  1,  1,   1,  1, 1 \
 }
 
-/* FIXME, where does this go, and does it exist? */
-/* #define CONST_DOUBLE_OK_FOR_CONSTRAINT_P(VALUE, C, STR)  1 */
-
 /* c4x doesn't use CALL_REALLY_USED_REGISTERS */
 /* They do use CONDITIONAL_REGISTER_USAGE though; it handles things that change
  * from c.l.a:s (like c4x vs .3x) */
@@ -412,12 +409,12 @@ enum reg_class
 /* A bunch of stuff about reloading that, as far as I know, I don't need. I very
  * well could be wrong, of course. */
 
-
 /* From c4x.h */
 #define CLASS_MAX_NREGS(CLASS, MODE)   \
     ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD)
 
-#define MODES_TIEABLE_P(MODE1, MODE2) 0
+#define MODES_TIEABLE_P(MODE1, MODE2) \
+	((MODE1) == (MODE2) || GET_MODE_CLASS (MODE1) == GET_MODE_CLASS (MODE2))
 
 /* I might need more than this, but I decdided to err on the side of minimizing
  * bloat.
@@ -447,6 +444,8 @@ extern const enum reg_class regclass_map[FIRST_PSEUDO_REGISTER];
 
 #define EXTRA_MEMORY_CONSTRAINT(C, STR) \
 	( (C) == 'Y' || (C) == 'S' || (C == 'T') || (C == 'U') )
+
+#define CONST_DOUBLE_OK_FOR_CONSTRAINT_P(VALUE, C, STR)  1
 
 /* Node: Frame Layout */
 /* http://focus.ti.com/lit/ug/spru103g/spru103g.pdf Explains a great deal about the ABI and frame layout */
