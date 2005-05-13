@@ -147,7 +147,6 @@ extern int target_flags;
 
 /* PC reg? */
 
-/* Node: Not a node */
 
 #define AUX_REGNO_P(REGNO) \
     ((unsigned int)(REGNO) - AR0_REGNO <= AR7_REGNO - AR0_REGNO)
@@ -198,7 +197,8 @@ extern int target_flags;
      1,  1,  1,  0,  0,  1,  1,  1,  1,  1,  1,   1,  1, 1 \
 }
 
-#define CONST_DOUBLE_OK_FOR_CONSTRAINT_P(VALUE, C, STR)  1
+/* FIXME, where does this go, and does it exist? */
+/* #define CONST_DOUBLE_OK_FOR_CONSTRAINT_P(VALUE, C, STR)  1 */
 
 /* c4x doesn't use CALL_REALLY_USED_REGISTERS */
 /* They do use CONDITIONAL_REGISTER_USAGE though; it handles things that change
@@ -208,13 +208,19 @@ extern int target_flags;
 /* REG_ALLOC_ORDER will be important */
 
 /* Node: Values in Registers */
+
+/* Ripped from c4x.h, should be fine */
+#define HARD_REGNO_NREGS(REGNO, MODE) \
+    ( (ACC_REGNO_P( REGNO )) ? 1 /* accumulators hold anything */  \
+    : ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD) 
+
 #define HARD_REGNO_MODE_OK(REGNO, MODE) c54x_hard_regno_mode_ok(REGNO, MODE)
 
 /* Node: Leaf Functions */
 /* cris and c4x don't use these, but I think I could, what with the
    quick-return insn. */
 
-/* Node: Stack Registers */
+/* Node: Stack Registers : not to be used */
 
 /* Node: Register Classes */
 enum reg_class
@@ -395,10 +401,10 @@ enum reg_class
 /* Oohh one of those seemingly overlapping macros.
  * I'm going to set this to be true for aux regs, which might not be as broad as
  * possible. */
-#define REGNO_OK_FOR_BASE_P(n) AUX_REGNO_P(n)
+#define REGNO_OK_FOR_BASE_P(n) AUX_REGNO_P (n)
 
 /* Same as REGNO_OK_FOR_BASE_P */
-#define REGNO_OK_FOR_INDEX_P(n) REGNO_OK_FOR_BASE_P(n)
+#define REGNO_OK_FOR_INDEX_P(n) AUX_REGNO (n)
 
 /* This will work, but might not be optimal */
 #define PREFERRED_RELOAD_CLASS(x, CLASS) CLASS
@@ -406,13 +412,10 @@ enum reg_class
 /* A bunch of stuff about reloading that, as far as I know, I don't need. I very
  * well could be wrong, of course. */
 
+
 /* From c4x.h */
 #define CLASS_MAX_NREGS(CLASS, MODE)   \
     ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD)
-
-/* Ripped from c4x.h, should be fine */
-#define HARD_REGNO_NREGS(REGNO, MODE) \
-	((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD)
 
 #define MODES_TIEABLE_P(MODE1, MODE2) 0
 
