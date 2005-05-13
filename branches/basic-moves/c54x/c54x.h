@@ -404,7 +404,7 @@ enum reg_class
 #define REGNO_OK_FOR_BASE_P(n) AUX_REGNO_P (n)
 
 /* Same as REGNO_OK_FOR_BASE_P */
-#define REGNO_OK_FOR_INDEX_P(n) AUX_REGNO (n)
+#define REGNO_OK_FOR_INDEX_P(n) AUX_REGNO_P (n)
 
 /* This will work, but might not be optimal */
 #define PREFERRED_RELOAD_CLASS(x, CLASS) CLASS
