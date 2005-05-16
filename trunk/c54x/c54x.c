@@ -49,6 +49,7 @@ Boston, MA 02111-1307, USA.  */
 #include "langhooks.h"
 #include "cgraph.h"
 #include "tree-gimple.h"
+#include "emit-rtl.h"
 
 enum reg_class const regclass_map[FIRST_PSEUDO_REGISTER] =
     {
@@ -56,7 +57,7 @@ enum reg_class const regclass_map[FIRST_PSEUDO_REGISTER] =
            IMR_REG, IFR_REG, ST0_REG, ST1_REG,
            
         /* A      B      T      TRN */
-           A_REG, B_REG, T_REG, TRN_REG,
+           ACC_REGS, ACC_REGS, T_REG, TRN_REG,
            
         /* AR0      AR1 */
            AR0_REG, AUX_REGS,
@@ -137,10 +138,23 @@ int
 legitimate_address_p (enum machine_mode mode, rtx addr, int strict)
 {
 	int valid=0;
+	rtx base, index;
 	
 	switch(GET_CODE(addr)) {
 	case REG:
-		valid = (AUX_REGNO_P(REGNO(addr)) || (!strict && PSEUDO_REGNO_P(REGNO(addr))));
+		valid = (AUX_REG_P(addr) || SP_REG_P(addr) || (!strict && PSEUDO_REG_P(addr)));
+		break;
+	case PLUS:
+		base = XEXP(addr, 0);
+		index = XEXP(addr, 1);
+
+		valid =
+			/* Indirect + offset Smem addressing */
+			((AUX_REG_P(base) || (!strict && PSEUDO_REG_P(base)))
+			 && (GET_CODE(index) == CONST_INT) && IN_RANGE_P(XINT(index, 0), 0, 65535))
+			/* Direct, offset from SP (cpl=1) */
+			|| ((SP_REG_P(base) || (!strict && PSEUDO_REG_P(base)))
+				&& (GET_CODE(index) == CONST_INT) && IN_RANGE_P(XINT(index, 0), 0, 128));
 		break;
 	case CONST:
 	case CONST_INT:
@@ -162,10 +176,20 @@ legitimate_address_p (enum machine_mode mode, rtx addr, int strict)
 }
 
 int
-c54x_legitimize_move(enum machine_mode mode, rtx op0, rtx op1)
+c54x_expand_movqi(rtx ops[])
 {
-	/* TODO: WriteMe */
-	return 0;
+	int done = 0;
+	
+	if(ACC_REG_P(ops[0])&& REG_P(ops[1])) {
+		ops[0] = copy_rtx(ops[0]);
+		PUT_MODE(ops[0], PSImode);
+		emit_insn(gen_ldm(ops[0], ops[1]));
+		done = 1;
+	} else if(REG_P(ops[0]) && (GET_CODE(ops[1]) == MEM && REG_P(XEXP(ops[1],0)))) {
+		done = 2;
+	}
+	
+	return done;
 }
 
 void
@@ -223,6 +247,7 @@ c54x_smem_p(rtx value, char letter)
 {
 	int valid = 0;
 	rtx addr;
+	rtx base, index;
 
 	if(GET_CODE(value) != MEM)
 		return valid;
@@ -245,6 +270,19 @@ c54x_smem_p(rtx value, char letter)
 	case CONST_INT:
 	case SYMBOL_REF:
 		valid = 1;
+		break;
+	case PLUS:
+		base = XEXP(addr, 0);
+		index = XEXP(addr, 1);
+
+		valid =
+			/* Indirect + offset Smem addressing */
+			(AUX_REG_P(base)
+				 && (GET_CODE(index) == CONST_INT) && IN_RANGE_P(XINT(index, 0), 0, 65535))
+			/* Direct, offset from SP (cpl=1) */
+			|| (SP_REG_P(base)
+				&& (GET_CODE(index) == CONST_INT) && IN_RANGE_P(XINT(index, 0), 0, 128));
+		break;
 	default:
 		break;
 	}

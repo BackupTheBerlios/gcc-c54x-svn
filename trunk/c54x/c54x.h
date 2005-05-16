@@ -164,15 +164,18 @@ extern int target_flags;
 	((unsigned int)(REGNO) >= FIRST_PSEUDO_REGISTER)
 #define XMEM_REGNO_P(REGNO) \
     ((unsigned int)(REGNO) - AR2_REGNO <= AR5_REGNO - AR2_REGNO)
+#define MMR_REGNO_P(REGNO) \
+	(AUX_REGNO_P(REGNO) || ST_REGNO_P(REGNO) || T_REGNO_P(REGNO))
 
-#define AUX_REG_P(X)    (AUX_REGNO_P(REGNO(X)))
-#define ACC_REG_P(X)    (ACC_REGNO_P(REGNO(X)))
-#define ST_REG_P(X)     (ST_REGNO_P(REGNO(X)))
-#define T_REG_P(X)      (T_REGNO_P(REGNO(X)))
-#define DP_REG_P(X)     (DP_REGNO_P(REGNO(X)))
-#define SP_REG_P(X)     (SP_REGNO_P(REGNO(X)))
-#define PSEUDO_REG_P(X) (PSEUDO_REGNO_P(REGNO(X)))
-#define XMEM_REG_P(X)   (XMEM_REGNO_P(REGNO(X)))
+#define AUX_REG_P(X)    (REG_P(X) && AUX_REGNO_P(REGNO(X)))
+#define ACC_REG_P(X)    (REG_P(X) && ACC_REGNO_P(REGNO(X)))
+#define ST_REG_P(X)     (REG_P(X) && ST_REGNO_P(REGNO(X)))
+#define T_REG_P(X)      (REG_P(X) && T_REGNO_P(REGNO(X)))
+#define DP_REG_P(X)     (REG_P(X) && DP_REGNO_P(REGNO(X)))
+#define SP_REG_P(X)     (REG_P(X) && SP_REGNO_P(REGNO(X)))
+#define PSEUDO_REG_P(X) (REG_P(X) && PSEUDO_REGNO_P(REGNO(X)))
+#define XMEM_REG_P(X)   (REG_P(X) && XMEM_REGNO_P(REGNO(X)))
+#define MMR_REG_P(X)    (REG_P(X) && MMR_REGNO_P(REGNO(X)))
 
 /* Node: Register Basics */
 
@@ -196,9 +199,6 @@ extern int target_flags;
   /* AR3 AR4 AR5 AR6 AR7 SP  BK  BRC RSA REA PMST XPC DP ARG */ \
      1,  1,  1,  0,  0,  1,  1,  1,  1,  1,  1,   1,  1, 1 \
 }
-
-/* FIXME, where does this go, and does it exist? */
-/* #define CONST_DOUBLE_OK_FOR_CONSTRAINT_P(VALUE, C, STR)  1 */
 
 /* c4x doesn't use CALL_REALLY_USED_REGISTERS */
 /* They do use CONDITIONAL_REGISTER_USAGE though; it handles things that change
@@ -249,6 +249,7 @@ enum reg_class
     STAT_REGS,
     ACC_REGS,
     BR_REGS,
+    MMR_REGS,
     GENERAL_REGS,
     ALL_REGS,
     LIM_REG_CLASSES
@@ -282,6 +283,7 @@ enum reg_class
     "STAT_REGS",        \
     "ACC_REGS",         \
     "BR_REGS",          \
+    "MMR_REGS",         \
     "GENERAL_REGS",     \
     "ALL_REGS",         \
 }
@@ -313,6 +315,7 @@ enum reg_class
     {0x0020000c}, /* STAT_REGS */ \
     {0x00000030}, /* ACC_REGS */ \
     {0x001c0000}, /* BR_REGS */ \
+    {0x007fffcf}, /* MMR_REGS */ \
     {0x011efff0}, /* GENERAL_REGS */ \
     {0xFFFFFFFF}  /* ALL_REGS */ \
 }
@@ -351,6 +354,7 @@ enum reg_class
  * w - DP reg
  * x - XPC reg
  * y - DBL_OP_REGS
+ * z - MMR_REGS
  *
  * Integer range constraints
  *
@@ -391,6 +395,7 @@ enum reg_class
     : ((c) == 'w') ? DP_REG        \
     : ((c) == 'x') ? XPC_REG       \
     : ((c) == 'y') ? DBL_OP_REGS   \
+    : ((c) == 'z') ? MMR_REGS      \
     : NO_REGS )
 
 /* Oohh one of those seemingly overlapping macros.
@@ -412,7 +417,8 @@ enum reg_class
 #define CLASS_MAX_NREGS(CLASS, MODE)   \
     ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD)
 
-#define MODES_TIEABLE_P(MODE1, MODE2) 0
+#define MODES_TIEABLE_P(MODE1, MODE2) \
+	((MODE1) == (MODE2) || GET_MODE_CLASS (MODE1) == GET_MODE_CLASS (MODE2))
 
 /* I might need more than this, but I decdided to err on the side of minimizing
  * bloat.
@@ -442,6 +448,8 @@ extern const enum reg_class regclass_map[FIRST_PSEUDO_REGISTER];
 
 #define EXTRA_MEMORY_CONSTRAINT(C, STR) \
 	( (C) == 'Y' || (C) == 'S' || (C == 'T') || (C == 'U') )
+
+#define CONST_DOUBLE_OK_FOR_CONSTRAINT_P(VALUE, C, STR)  1
 
 /* Node: Frame Layout */
 /* http://focus.ti.com/lit/ug/spru103g/spru103g.pdf Explains a great deal about the ABI and frame layout */
@@ -510,6 +518,8 @@ do { \
         (OFFSET) = offset; \
 	} \
 } while(0);
+
+#define SMALL_REGISTER_CLASSES 1
 
 /* Node: 13.11 Trampolines for Nested Functions */
 
