@@ -228,15 +228,9 @@ enum reg_class
     NO_REGS,
     IMR_REG,
     IFR_REG,
-    ST0_REG,
-    ST1_REG,
     A_REG,
-    B_REG,
     T_REG,
     TRN_REG,
-    AR0_REG,
-    DBL_OP_REGS,
-    AUX_REGS,
     SP_REG,
     BK_REG,
     BRC_REG,
@@ -245,10 +239,13 @@ enum reg_class
     PMST_REG,
     XPC_REG,
     DP_REG,
+    ST_REGS,
     INT_REGS,
     STAT_REGS,
     ACC_REGS,
     BR_REGS,
+    DBL_OP_REGS,
+    AUX_REGS,
     MMR_REGS,
     GENERAL_REGS,
     ALL_REGS,
@@ -262,15 +259,10 @@ enum reg_class
     "NO_REGS",          \
     "IMR_REG",          \
     "IFR_REG",          \
-    "ST0_REG",          \
-    "ST1_REG",          \
     "A_REG",            \
-    "B_REG",            \
     "T_REG",            \
     "TRN_REG",          \
     "AR0_REG",          \
-    "DBL_OP_REGS",      \
-    "AUX_REGS",         \
     "SP_REG",           \
     "BK_REG",           \
     "BRC_REG",          \
@@ -279,10 +271,13 @@ enum reg_class
     "PMST_REG",         \
     "XPC_REG",          \
     "DP_REG",           \
+    "ST_REGS",          \
     "INT_REGS",         \
     "STAT_REGS",        \
     "ACC_REGS",         \
     "BR_REGS",          \
+    "DBL_OP_REGS",      \
+    "AUX_REGS",         \
     "MMR_REGS",         \
     "GENERAL_REGS",     \
     "ALL_REGS",         \
@@ -294,15 +289,10 @@ enum reg_class
     {0x00000000}, /* NO_REGS */ \
     {0x00000001}, /* IMR_REG */ \
     {0x00000002}, /* IFR_REG */ \
-    {0x00000004}, /* ST0_REG */ \
-    {0x00000008}, /* ST1_REG */ \
     {0x00000010}, /* A_REG */ \
-    {0x00000020}, /* B_REG */ \
     {0x00000040}, /* T_REG */ \
     {0x00000080}, /* TRN_REG */ \
     {0x00000100}, /* AR0_REG */ \
-    {0x00003C00}, /* DBL_OP_REGS */ \
-    {0x0000FF00}, /* AUX_REGS */ \
     {0x00010000}, /* SP_REG */ \
     {0x00020000}, /* BK_REG */ \
     {0x00040000}, /* BRC_REG */ \
@@ -311,10 +301,13 @@ enum reg_class
     {0x00200000}, /* PMST_REG */ \
     {0x00400000}, /* XPC_REG */ \
     {0x00800000}, /* DP_REG */ \
+    {0x0000000c}, /* ST_REGS */ \
     {0x00000003}, /* INT_REGS */ \
     {0x0020000c}, /* STAT_REGS */ \
     {0x00000030}, /* ACC_REGS */ \
     {0x001c0000}, /* BR_REGS */ \
+    {0x00003C00}, /* DBL_OP_REGS */ \
+    {0x0000FF00}, /* AUX_REGS */ \
     {0x007fffcf}, /* MMR_REGS */ \
     {0x011efff0}, /* GENERAL_REGS */ \
     {0xFFFFFFFF}  /* ALL_REGS */ \
@@ -331,12 +324,10 @@ enum reg_class
 /* Register constraint letters
  *
  * a - Accum. A
- * b - Accum. B
  * c - Accums
  * d - AR0
  * e - AUX_REGS
  * f - T reg
- * g - TRN reg
  * h - SP reg
  * i - INT_REGS
  * j - IMR reg
@@ -348,8 +339,7 @@ enum reg_class
  * p - REA reg
  * r - General regs
  * s - STAT_REGS
- * t - ST0 reg
- * u - ST1 reg
+ * t - TRN reg
  * v - PMST reg
  * w - DP reg
  * x - XPC reg
@@ -378,10 +368,8 @@ enum reg_class
     ( ((c) == 'a') ? A_REG         \
     : ((c) == 'b') ? B_REG         \
     : ((c) == 'c') ? ACC_REGS      \
-    : ((c) == 'd') ? AR0_REG       \
     : ((c) == 'e') ? AUX_REGS      \
     : ((c) == 'f') ? T_REG         \
-    : ((c) == 'g') ? TRN_REG       \
     : ((c) == 'h') ? SP_REG        \
     : ((c) == 'i') ? INT_REGS      \
     : ((c) == 'm') ? BR_REGS       \
@@ -389,8 +377,7 @@ enum reg_class
     : ((c) == 'o') ? RSA_REG       \
     : ((c) == 'p') ? REA_REG       \
     : ((c) == 's') ? STAT_REGS     \
-    : ((c) == 't') ? ST0_REG       \
-    : ((c) == 'u') ? ST1_REG       \
+    : ((c) == 't') ? TRN_REG       \
     : ((c) == 'v') ? PMST_REG      \
     : ((c) == 'w') ? DP_REG        \
     : ((c) == 'x') ? XPC_REG       \
