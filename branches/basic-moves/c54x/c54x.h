@@ -164,6 +164,8 @@ extern int target_flags;
 	((unsigned int)(REGNO) >= FIRST_PSEUDO_REGISTER)
 #define XMEM_REGNO_P(REGNO) \
     ((unsigned int)(REGNO) - AR2_REGNO <= AR5_REGNO - AR2_REGNO)
+#define MMR_REGNO_P(REGNO) \
+	(AUX_REGNO_P(REGNO) || ST_REGNO_P(REGNO) || T_REGNO_P(REGNO))
 
 #define AUX_REG_P(X)    (AUX_REGNO_P(REGNO(X)))
 #define ACC_REG_P(X)    (ACC_REGNO_P(REGNO(X)))
@@ -173,6 +175,7 @@ extern int target_flags;
 #define SP_REG_P(X)     (SP_REGNO_P(REGNO(X)))
 #define PSEUDO_REG_P(X) (PSEUDO_REGNO_P(REGNO(X)))
 #define XMEM_REG_P(X)   (XMEM_REGNO_P(REGNO(X)))
+#define MMR_REG_P(X)    (MMR_REGNO_P(REGNO(X)))
 
 /* Node: Register Basics */
 
