@@ -185,7 +185,9 @@ c54x_expand_movqi(rtx ops[])
 		PUT_MODE(ops[0], PSImode);
 		emit_insn(gen_ldm(ops[0], ops[1]));
 		done = 1;
-	} 
+	} else if(REG_P(ops[0]) && (GET_CODE(ops[1]) == MEM && REG_P(XEXP(ops[1],0)))) {
+		done = 2;
+	}
 	
 	return done;
 }
