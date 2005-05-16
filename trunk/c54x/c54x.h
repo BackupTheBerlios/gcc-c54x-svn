@@ -262,7 +262,6 @@ enum reg_class
     "A_REG",            \
     "T_REG",            \
     "TRN_REG",          \
-    "AR0_REG",          \
     "SP_REG",           \
     "BK_REG",           \
     "BRC_REG",          \
@@ -292,7 +291,6 @@ enum reg_class
     {0x00000010}, /* A_REG */ \
     {0x00000040}, /* T_REG */ \
     {0x00000080}, /* TRN_REG */ \
-    {0x00000100}, /* AR0_REG */ \
     {0x00010000}, /* SP_REG */ \
     {0x00020000}, /* BK_REG */ \
     {0x00040000}, /* BRC_REG */ \
@@ -366,7 +364,6 @@ enum reg_class
 #define REG_CLASS_FROM_LETTER(c)  \
     \
     ( ((c) == 'a') ? A_REG         \
-    : ((c) == 'b') ? B_REG         \
     : ((c) == 'c') ? ACC_REGS      \
     : ((c) == 'e') ? AUX_REGS      \
     : ((c) == 'f') ? T_REG         \

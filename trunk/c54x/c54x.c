@@ -54,13 +54,13 @@ Boston, MA 02111-1307, USA.  */
 enum reg_class const regclass_map[FIRST_PSEUDO_REGISTER] =
     {
         /* IMR      IFR      ST0      ST1 */
-           IMR_REG, IFR_REG, ST0_REG, ST1_REG,
+           IMR_REG, IFR_REG, ST_REGS, ST_REGS,
            
-        /* A      B      T      TRN */
-           ACC_REGS, ACC_REGS, T_REG, TRN_REG,
+        /* A      B         T      TRN */
+           A_REG, ACC_REGS, T_REG, TRN_REG,
            
-        /* AR0      AR1 */
-           AR0_REG, AUX_REGS,
+        /* AR0       AR1 */
+           AUX_REGS, AUX_REGS,
            
         /* AR2          AR3          AR4          AR5  */
            DBL_OP_REGS, DBL_OP_REGS, DBL_OP_REGS, DBL_OP_REGS,
