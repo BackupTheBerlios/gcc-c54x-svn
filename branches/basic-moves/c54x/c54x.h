@@ -167,15 +167,15 @@ extern int target_flags;
 #define MMR_REGNO_P(REGNO) \
 	(AUX_REGNO_P(REGNO) || ST_REGNO_P(REGNO) || T_REGNO_P(REGNO))
 
-#define AUX_REG_P(X)    (AUX_REGNO_P(REGNO(X)))
-#define ACC_REG_P(X)    (ACC_REGNO_P(REGNO(X)))
-#define ST_REG_P(X)     (ST_REGNO_P(REGNO(X)))
-#define T_REG_P(X)      (T_REGNO_P(REGNO(X)))
-#define DP_REG_P(X)     (DP_REGNO_P(REGNO(X)))
-#define SP_REG_P(X)     (SP_REGNO_P(REGNO(X)))
-#define PSEUDO_REG_P(X) (PSEUDO_REGNO_P(REGNO(X)))
-#define XMEM_REG_P(X)   (XMEM_REGNO_P(REGNO(X)))
-#define MMR_REG_P(X)    (MMR_REGNO_P(REGNO(X)))
+#define AUX_REG_P(X)    ((GET_CODE(X) == REG) && AUX_REGNO_P(REGNO(X)))
+#define ACC_REG_P(X)    ((GET_CODE(X) == REG) && ACC_REGNO_P(REGNO(X)))
+#define ST_REG_P(X)     ((GET_CODE(X) == REG) && ST_REGNO_P(REGNO(X)))
+#define T_REG_P(X)      ((GET_CODE(X) == REG) && T_REGNO_P(REGNO(X)))
+#define DP_REG_P(X)     ((GET_CODE(X) == REG) && DP_REGNO_P(REGNO(X)))
+#define SP_REG_P(X)     ((GET_CODE(X) == REG) && SP_REGNO_P(REGNO(X)))
+#define PSEUDO_REG_P(X) ((GET_CODE(X) == REG) && PSEUDO_REGNO_P(REGNO(X)))
+#define XMEM_REG_P(X)   ((GET_CODE(X) == REG) && XMEM_REGNO_P(REGNO(X)))
+#define MMR_REG_P(X)    ((GET_CODE(X) == REG) && MMR_REGNO_P(REGNO(X)))
 
 /* Node: Register Basics */
 
