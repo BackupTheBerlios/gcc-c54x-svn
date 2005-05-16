@@ -138,10 +138,23 @@ int
 legitimate_address_p (enum machine_mode mode, rtx addr, int strict)
 {
 	int valid=0;
+	rtx base, index;
 	
 	switch(GET_CODE(addr)) {
 	case REG:
 		valid = (AUX_REG_P(addr) || SP_REG_P(addr) || (!strict && PSEUDO_REG_P(addr)));
+		break;
+	case PLUS:
+		base = XEXP(addr, 0);
+		index = XEXP(addr, 1);
+
+		valid =
+			/* Indirect + offset Smem addressing */
+			((AUX_REG_P(base) || (!strict && PSEUDO_REG_P(base)))
+			 && (GET_CODE(index) == CONST_INT) && IN_RANGE_P(XINT(index, 0), 0, 65535))
+			/* Direct, offset from SP (cpl=1) */
+			|| ((SP_REG_P(base) || (!strict && PSEUDO_REG_P(base)))
+				&& (GET_CODE(index) == CONST_INT) && IN_RANGE_P(XINT(index, 0), 0, 128));
 		break;
 	case CONST:
 	case CONST_INT:
@@ -232,6 +245,7 @@ c54x_smem_p(rtx value, char letter)
 {
 	int valid = 0;
 	rtx addr;
+	rtx base, index;
 
 	if(GET_CODE(value) != MEM)
 		return valid;
@@ -254,6 +268,19 @@ c54x_smem_p(rtx value, char letter)
 	case CONST_INT:
 	case SYMBOL_REF:
 		valid = 1;
+		break;
+	case PLUS:
+		base = XEXP(addr, 0);
+		index = XEXP(addr, 1);
+
+		valid =
+			/* Indirect + offset Smem addressing */
+			(AUX_REG_P(base)
+				 && (GET_CODE(index) == CONST_INT) && IN_RANGE_P(XINT(index, 0), 0, 65535))
+			/* Direct, offset from SP (cpl=1) */
+			|| (SP_REG_P(base)
+				&& (GET_CODE(index) == CONST_INT) && IN_RANGE_P(XINT(index, 0), 0, 128));
+		break;
 	default:
 		break;
 	}
