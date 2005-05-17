@@ -438,7 +438,7 @@ extern const enum reg_class regclass_map[FIRST_PSEUDO_REGISTER];
 /* http://focus.ti.com/lit/ug/spru103g/spru103g.pdf Explains a great deal about the ABI and frame layout */
 
 /* note to the humorless: the value of the preceding macro is unimportant */
-#define STACK_GROWS_DOWNWARD 0xdeadbeef
+#define STACK_GROWS_DOWNWARD
 
 /* FRAME info is stuff I'll have to figure out from the TI compiler */
 #define FRAME_GROWS_DOWNWARD /* This is not important for ABI compat, should optionnaly check with TI  */

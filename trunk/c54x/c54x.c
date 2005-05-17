@@ -156,14 +156,20 @@ legitimate_address_p (enum machine_mode mode, rtx addr, int strict)
 			|| ((SP_REG_P(base) || (!strict && PSEUDO_REG_P(base)))
 				&& (GET_CODE(index) == CONST_INT) && IN_RANGE_P(XINT(index, 0), 0, 128));
 		break;
+	case PRE_DEC:
+	case POST_INC:
+		/* base = XEXP(addr, 0); */
+/* 		valid = SP_REG_P(base) || AUX_REG_P(base) || ((!strict && PSEUDO_REG_P(base))); */
+/* 		break; */
+	case PRE_INC:
+	case POST_DEC:
+		base = XEXP(addr, 0);
+		valid = AUX_REG_P(base) || ((!strict && PSEUDO_REG_P(base)));
+		break;
 	case CONST:
 	case CONST_INT:
 	case SYMBOL_REF:
 	case LABEL_REF:
-	case POST_DEC:
-	case POST_INC:
-	case PRE_INC:
-	case PRE_DEC:
 		valid = 1;
 		break;
 	default:
@@ -180,12 +186,34 @@ int
 c54x_expand_movqi(rtx ops[])
 {
 	int done = 0;
+	int i;
+
+	fprintf(stderr, "--->>>");
+	for(i=0; i < 2; i++) {
+		print_rtl(stderr, ops[i]);
+	}
+	fprintf(stderr, "<<<---\n");
+
 	
-	if(ACC_REG_P(ops[0])&& REG_P(ops[1])) {
+	if(ACC_REG_P(ops[0])) {
 		ops[0] = copy_rtx(ops[0]);
 		PUT_MODE(ops[0], PSImode);
-		emit_insn(gen_ldm(ops[0], ops[1]));
+		fprintf(stderr, "+++");
+		print_rtl(stderr, ops[0]);
+		fprintf(stderr, "+++\n");
+
 		done = 1;
+
+		if(MEM_P(ops[1])) {
+			emit_insn(gen_ldm(ops[0], ops[1]));
+		} else if(REG_P(ops[1])) {
+			emit_insn(gen_ldu(ops[0], ops[1]));
+		} else if(CONSTANT_P(ops[1])) {
+			emit_insn(gen_ld_const(ops[0], ops[1], gen_reg_rtx(QImode)));
+		} else {
+			done = 2;
+		}
+
 	} else if(REG_P(ops[0]) && (GET_CODE(ops[1]) == MEM && REG_P(XEXP(ops[1],0)))) {
 		done = 2;
 	}
@@ -203,6 +231,12 @@ c54x_expand_addqi(rtx ops[])
 		print_rtl(stderr, ops[i]);
 	}
 	fprintf(stderr, ">>>---\n");
+
+	if(SP_REG_P(ops[0])
+	   && SP_REG_P(ops[1])
+	   && (GET_CODE(ops[2]) == CONST_INT)) {
+		emit_insn(gen_frame(ops[0], ops[2]));
+	}
 }
 
 void
@@ -341,13 +375,19 @@ void
 c54x_print_operand(FILE *stream, rtx op, char letter)
 {
 	rtx mem;
+	rtx base;
+	rtx disp;
 	
 	switch(GET_CODE(op)) {
 	case REG:
 		fprintf(stream, "%s", reg_names[REGNO(op)]);
 		break;
 	case CONST_INT:
-		fprintf(stream, "#%d", XINT(op, 0));
+		if(letter == 'I') {
+			fprintf(stream, "0%xh", 0xffff & XINT(op, 0));
+		} else {
+			fprintf(stream, "%d", XINT(op, 0));
+		}
 		break;
 	case MEM:
 		mem = XEXP(op, 0);
@@ -358,6 +398,13 @@ c54x_print_operand(FILE *stream, rtx op, char letter)
 			break;
 		case REG:
 			fprintf(stream, "*%s", reg_names[REGNO(mem)]);
+			break;
+		case PLUS:
+			base = XEXP(mem, 0);
+			disp = XEXP(mem, 1);
+			if( REG_P(base) && CONSTANT_P(disp) ) {
+				fprintf(stream, "*%s(%d)", reg_names[REGNO(base)], XINT(disp, 0));
+			}
 			break;
 		default:
 			fprintf(stream, "mem:");
