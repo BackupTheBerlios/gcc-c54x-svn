@@ -151,7 +151,7 @@ legitimate_address_p (enum machine_mode mode, rtx addr, int strict)
 		valid =
 			/* Indirect + offset Smem addressing */
 			((AUX_REG_P(base) || (!strict && PSEUDO_REG_P(base)))
-			 && (GET_CODE(index) == CONST_INT) && IN_RANGE_P(XINT(index, 0), 0, 65535))
+			 && (GET_CODE(index) == CONST_INT) && IN_RANGE_P(XINT(index, 0), -32768, 65535))
 			/* Direct, offset from SP (cpl=1) */
 			|| ((SP_REG_P(base) || (!strict && PSEUDO_REG_P(base)))
 				&& (GET_CODE(index) == CONST_INT) && IN_RANGE_P(XINT(index, 0), 0, 128));
@@ -278,7 +278,7 @@ c54x_smem_p(rtx value, char letter)
 		valid =
 			/* Indirect + offset Smem addressing */
 			(AUX_REG_P(base)
-				 && (GET_CODE(index) == CONST_INT) && IN_RANGE_P(XINT(index, 0), 0, 65535))
+				 && (GET_CODE(index) == CONST_INT) && IN_RANGE_P(XINT(index, 0), -32768, 65535))
 			/* Direct, offset from SP (cpl=1) */
 			|| (SP_REG_P(base)
 				&& (GET_CODE(index) == CONST_INT) && IN_RANGE_P(XINT(index, 0), 0, 128));
