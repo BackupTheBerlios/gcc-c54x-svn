@@ -163,6 +163,7 @@ legitimate_address_p (enum machine_mode mode, rtx addr, int strict)
 	case POST_DEC:
 	case POST_INC:
 	case PRE_INC:
+	case PRE_DEC:
 		valid = 1;
 		break;
 	default:
@@ -190,6 +191,18 @@ c54x_expand_movqi(rtx ops[])
 	}
 	
 	return done;
+}
+
+void
+c54x_expand_addqi(rtx ops[]) 
+{
+	int i;
+
+	fprintf(stderr, "---<<<");
+	for(i=0; i < 3; i++) {
+		print_rtl(stderr, ops[i]);
+	}
+	fprintf(stderr, ">>>---\n");
 }
 
 void
