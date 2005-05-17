@@ -162,6 +162,8 @@ extern int target_flags;
     IN_REG_RANGE_P(REGNO, DP_REGNO, DP_REGNO)
 #define SP_REGNO_P(REGNO) \
     IN_REG_RANGE_P(REGNO, SP_REGNO, SP_REGNO)
+#define ARSP_REGNO_P(REGNO) \
+    IN_REG_RANGE_P(REGNO, AR0_REGNO, SP_REGNO)
 #define PSEUDO_REGNO_P(REGNO) \
     ((unsigned int)(REGNO) >= FIRST_PSEUDO_REGISTER)
 #define XMEM_REGNO_P(REGNO) \
@@ -175,6 +177,7 @@ extern int target_flags;
 #define T_REG_P(X)      (REG_P(X) && T_REGNO_P(REGNO(X)))
 #define DP_REG_P(X)     (REG_P(X) && DP_REGNO_P(REGNO(X)))
 #define SP_REG_P(X)     (REG_P(X) && SP_REGNO_P(REGNO(X)))
+#define ARSP_REG_P(X)   (REG_P(X) && ARSP_REGNO_P(REGNO(X)))
 #define PSEUDO_REG_P(X) (REG_P(X) && PSEUDO_REGNO_P(REGNO(X)))
 #define XMEM_REG_P(X)   (REG_P(X) && XMEM_REGNO_P(REGNO(X)))
 #define MMR_REG_P(X)    (REG_P(X) && MMR_REGNO_P(REGNO(X)))
@@ -226,34 +229,34 @@ extern int target_flags;
 
 /* Node: Register Classes */
 enum reg_class
-    {
-        NO_REGS,
-        IMR_REG,
-        IFR_REG,
-        A_REG,
-        T_REG,
-        TRN_REG,
-        SP_REG,
-        BK_REG,
-        BRC_REG,
-        RSA_REG,
-        REA_REG,
-        PMST_REG,
-        XPC_REG,
-        DP_REG,
-        ST_REGS,
-        INT_REGS,
-        STAT_REGS,
-        ACC_REGS,
-        BR_REGS,
-        DBL_OP_REGS,
-        AUX_REGS,
-        AR_SP_REGS,
-        MMR_REGS,
-        GENERAL_REGS,
-        ALL_REGS,
-        LIM_REG_CLASSES
-    };
+{
+    NO_REGS,
+    IMR_REG,
+    IFR_REG,
+    A_REG,
+    T_REG,
+    TRN_REG,
+    SP_REG,
+    BK_REG,
+    BRC_REG,
+    RSA_REG,
+    REA_REG,
+    PMST_REG,
+    XPC_REG,
+    DP_REG,
+    ST_REGS,
+    INT_REGS,
+    STAT_REGS,
+    ACC_REGS,
+    BR_REGS,
+    DBL_OP_REGS,
+    AUX_REGS,
+    ARSP_REGS,
+    MMR_REGS,
+    GENERAL_REGS,
+    ALL_REGS,
+    LIM_REG_CLASSES
+};
 
 #define N_REG_CLASSES (int) LIM_REG_CLASSES
 
@@ -310,11 +313,11 @@ enum reg_class
     {0x001c0000}, /* BR_REGS */ \
     {0x00003c00}, /* DBL_OP_REGS */ \
     {0x0000ff00}, /* AUX_REGS */ \
-    {0x0001ff00}, /* ARSP_REGS */
- {0x007fffcf}, /* MMR_REGS */ \
-     {0x011efff0}, /* GENERAL_REGS */ \
-         {0xffffffff}  /* ALL_REGS */ \
-                                          }
+    {0x0001ff00}, /* ARSP_REGS */ \
+    {0x007fffcf}, /* MMR_REGS */ \
+    {0x011efff0}, /* GENERAL_REGS */ \
+    {0xffffffff}  /* ALL_REGS */ \
+}
 
 /* Register constraint letters
  *
@@ -379,14 +382,6 @@ enum reg_class
     : ((c) == 'z') ? MMR_REGS      \
     : NO_REGS )
 
-/* Oohh one of those seemingly overlapping macros.
- * I'm going to set this to be true for aux regs, which might not be as broad as
- * possible. */
-#define REGNO_OK_FOR_BASE_P(n) AUX_REGNO_P (n)
-
-/* Same as REGNO_OK_FOR_BASE_P */
-#define REGNO_OK_FOR_INDEX_P(n) AUX_REGNO_P (n)
-
 /* This will work, but might not be optimal */
 #define PREFERRED_RELOAD_CLASS(x, CLASS) CLASS
 
@@ -435,9 +430,9 @@ extern const enum reg_class regclass_map[FIRST_PSEUDO_REGISTER];
 
 #define INDEX_REG_CLASS NO_REGS
 
-#define REG_OK_FOR_INDEX_P(X) AUX_REGNO_P(REGNO(X))
+#define REGNO_OK_FOR_BASE_P(REGNO) (ARSP_REGNO_P(REGNO) || PSEUDO_REGNO_P(REGNO))
 
-#define REG_OK_FOR_BASE_P(X) AUX_REGNO_P(REGNO(X))
+#define REGNO_OK_FOR_INDEX_P(REGNO) 0
 
 /* Node: Frame Layout */
 /* http://focus.ti.com/lit/ug/spru103g/spru103g.pdf Explains a great deal about the ABI and frame layout */
@@ -566,19 +561,31 @@ struct cumul_args {
 
 #define LEGITIMATE_CONSTANT_P(X) 1 /* Not sure */
 
+#define REG_OK_FOR_INDEX_P(X) 0
+
 #ifdef REG_OK_STRICT
+/* Strict */
+
 #define GO_IF_LEGITIMATE_ADDRESS(MODE, X, ADDR)                         \
 do {                                                                    \
   if (legitimate_address_p ((MODE), (X), 1))                            \
     goto ADDR;                                                          \
 } while (0)
+
+#define REG_OK_FOR_BASE_P(X) ARSP_REG_P(X)
+
 #else
+/* Non-strict */
+
 #define GO_IF_LEGITIMATE_ADDRESS(MODE, X, ADDR)                         \
 do {                                                                    \
   if (legitimate_address_p ((MODE), (X), 0))                            \
     goto ADDR;                                                          \
 } while (0)
-#endif
+
+#define REG_OK_FOR_BASE_P(X) (ARSP_REG_P(X) || PSEUDO_REG_P(X))
+
+#endif /* REG_OK_STRICT */
 
 #define HAVE_POST_DECREMENT 1
 
