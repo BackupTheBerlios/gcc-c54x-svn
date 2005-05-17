@@ -214,12 +214,14 @@ extern int target_flags;
 
 /* Node: Values in Registers */
 
-/* Ripped from c4x.h, should be fine */
 #define HARD_REGNO_NREGS(REGNO, MODE) \
-    ( (ACC_REGNO_P( REGNO )) ? 1 /* accumulators hold anything */  \
+    ( (ACC_REGNO_P( REGNO )) ? (GET_MODE_SIZE (MODE) + (2*UNITS_PER_WORD) - 1) / (2*UNITS_PER_WORD) \
     : ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD) )
 
-#define HARD_REGNO_MODE_OK(REGNO, MODE) c54x_hard_regno_mode_ok(REGNO, MODE)
+#define HARD_REGNO_MODE_OK (REGNO, MODE) c54x_hard_regno_mode_ok(REGNO, MODE)
+
+#define MODES_TIEABLE_P(MODE1, MODE2) \
+    ((MODE1) == (MODE2) || GET_MODE_CLASS (MODE1) == GET_MODE_CLASS (MODE2))
 
 /* Node: Leaf Functions */
 /* cris and c4x don't use these, but I think I could, what with the
@@ -388,16 +390,14 @@ enum reg_class
 /* A bunch of stuff about reloading that, as far as I know, I don't need. I very
  * well could be wrong, of course. */
 
-/* From c4x.h */
+/* FIXME: This needs help */
 #define CLASS_MAX_NREGS(CLASS, MODE)   \
-    ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD)
+    ( (CLASS == ACC_REGS) ? 1 /* 32 bit in 1 32bit registers */ \
+                          : 4 /* 64 bit in 4 16bit registers */ \
+    )
+/*    ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD) */
 
-#define MODES_TIEABLE_P(MODE1, MODE2) \
-    ((MODE1) == (MODE2) || GET_MODE_CLASS (MODE1) == GET_MODE_CLASS (MODE2))
 
-/* I might need more than this, but I decdided to err on the side of minimizing
- * bloat.
- */
 #define IN_RANGE_P(val, bottom, top) \
     (bottom <= val && val <= top)
 
