@@ -147,23 +147,25 @@ extern int target_flags;
 
 /* PC reg? */
 
+#define IN_REG_RANGE_P(REGNO, MIN, MAX) \
+	((unsigned int)(REGNO) - (MIN) <= (MAX) - (MIN))
 
 #define AUX_REGNO_P(REGNO) \
-    ((unsigned int)(REGNO) - AR0_REGNO <= AR7_REGNO - AR0_REGNO)
+	IN_REG_RANGE_P(REGNO, AR0_REGNO, AR7_REGNO)
 #define ACC_REGNO_P(REGNO) \
-    ((unsigned int)(REGNO) - A_REGNO <= B_REGNO - A_REGNO)
+	IN_REG_RANGE_P(REGNO, A_REGNO, B_REGNO)
 #define ST_REGNO_P(REGNO) \
-    ((unsigned int)(REGNO) - ST0_REGNO <= ST1_REGNO - ST0_REGNO)
+	IN_REG_RANGE_P(REGNO, ST0_REGNO, ST1_REGNO)
 #define T_REGNO_P(REGNO) \
-    ((unsigned int)(REGNO) == T_REGNO)
+	IN_REG_RANGE_P(REGNO, T_REGNO, T_REGNO)
 #define DP_REGNO_P(REGNO) \
-    ((unsigned int)(REGNO) == DP_REGNO)
+	IN_REG_RANGE_P(REGNO, DP_REGNO, DP_REGNO)
 #define SP_REGNO_P(REGNO) \
-    ((unsigned int)(REGNO) == SP_REGNO)
+	IN_REG_RANGE_P(REGNO, SP_REGNO, SP_REGNO)
 #define PSEUDO_REGNO_P(REGNO) \
 	((unsigned int)(REGNO) >= FIRST_PSEUDO_REGISTER)
 #define XMEM_REGNO_P(REGNO) \
-    ((unsigned int)(REGNO) - AR2_REGNO <= AR5_REGNO - AR2_REGNO)
+	IN_REG_RANGE_P(REGNO, AR2_REGNO, AR5_REGNO)
 #define MMR_REGNO_P(REGNO) \
 	(AUX_REGNO_P(REGNO) || ST_REGNO_P(REGNO) || T_REGNO_P(REGNO))
 
@@ -411,7 +413,7 @@ enum reg_class
     (bottom <= val && val <= top)
 
 #define CONST_OK_FOR_LETTER_P(value, c)                \
-    ( ((c) == 'I') ? IN_RANGE_P (value, -32768, 32767) \
+    ( ((c) == 'I') ? IN_RANGE_P (value, -32768, 65535) \
     : ((c) == 'J') ? IN_RANGE_P (value, 0, 7)          \
     : ((c) == 'K') ? IN_RANGE_P (value, 0, 15)         \
     : ((c) == 'L') ? IN_RANGE_P (value, -16, 15)       \
