@@ -2,25 +2,25 @@
    Copyright (C) 2005 Free Software Foundation, Inc.
    Contributed by Bryan Richter and Jonathan Bastien-Filiatrault
 
-This file is part of GCC.
+   This file is part of GCC.
 
-GCC is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+   GCC is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
 
-GCC is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   GCC is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with GCC; see the file COPYING.  If not, write to
-the Free Software Foundation, 59 Temple Place - Suite 330,
-Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with GCC; see the file COPYING.  If not, write to
+   the Free Software Foundation, 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 /* c54x.h
-Definitions and stuff */
+   Definitions and stuff */
 
 /* As "Porting GCC For Dunces" is one of my references, this will draw from the
  * cris port that is highlighted therein. It will also rely on the c4x, for
@@ -62,8 +62,8 @@ extern int target_flags;
 #define FUNCTION_BOUNDARY        BITS_PER_WORD
 #define BIGGEST_ALIGNMENT        BITS_PER_WORD*2
 #define MINIMUM_ATOMIC_ALIGNMENT BITS_PER_WORD
-#define EMPTY_FIELD_BOUNDARY	 BITS_PER_WORD
-#define STRICT_ALIGNMENT	     1  /* Nothing is smaller than alignment.. */
+#define EMPTY_FIELD_BOUNDARY     BITS_PER_WORD
+#define STRICT_ALIGNMENT         1  /* Nothing is smaller than alignment.. */
 #define MAX_FIXED_MODE_SIZE      32 /* HImode, same as c4x */
 /* VECTOR_MODE_SUPPORTED? */
 
@@ -148,26 +148,26 @@ extern int target_flags;
 /* PC reg? */
 
 #define IN_REG_RANGE_P(REGNO, MIN, MAX) \
-	((unsigned int)(REGNO) - (MIN) <= (MAX) - (MIN))
+    ((unsigned int)(REGNO) - (MIN) <= (MAX) - (MIN))
 
 #define AUX_REGNO_P(REGNO) \
-	IN_REG_RANGE_P(REGNO, AR0_REGNO, AR7_REGNO)
+    IN_REG_RANGE_P(REGNO, AR0_REGNO, AR7_REGNO)
 #define ACC_REGNO_P(REGNO) \
-	IN_REG_RANGE_P(REGNO, A_REGNO, B_REGNO)
+    IN_REG_RANGE_P(REGNO, A_REGNO, B_REGNO)
 #define ST_REGNO_P(REGNO) \
-	IN_REG_RANGE_P(REGNO, ST0_REGNO, ST1_REGNO)
+    IN_REG_RANGE_P(REGNO, ST0_REGNO, ST1_REGNO)
 #define T_REGNO_P(REGNO) \
-	IN_REG_RANGE_P(REGNO, T_REGNO, T_REGNO)
+    IN_REG_RANGE_P(REGNO, T_REGNO, T_REGNO)
 #define DP_REGNO_P(REGNO) \
-	IN_REG_RANGE_P(REGNO, DP_REGNO, DP_REGNO)
+    IN_REG_RANGE_P(REGNO, DP_REGNO, DP_REGNO)
 #define SP_REGNO_P(REGNO) \
-	IN_REG_RANGE_P(REGNO, SP_REGNO, SP_REGNO)
+    IN_REG_RANGE_P(REGNO, SP_REGNO, SP_REGNO)
 #define PSEUDO_REGNO_P(REGNO) \
-	((unsigned int)(REGNO) >= FIRST_PSEUDO_REGISTER)
+    ((unsigned int)(REGNO) >= FIRST_PSEUDO_REGISTER)
 #define XMEM_REGNO_P(REGNO) \
-	IN_REG_RANGE_P(REGNO, AR2_REGNO, AR5_REGNO)
+    IN_REG_RANGE_P(REGNO, AR2_REGNO, AR5_REGNO)
 #define MMR_REGNO_P(REGNO) \
-	(AUX_REGNO_P(REGNO) || ST_REGNO_P(REGNO) || T_REGNO_P(REGNO))
+    (AUX_REGNO_P(REGNO) || ST_REGNO_P(REGNO) || T_REGNO_P(REGNO))
 
 #define AUX_REG_P(X)    (REG_P(X) && AUX_REGNO_P(REGNO(X)))
 #define ACC_REG_P(X)    (REG_P(X) && ACC_REGNO_P(REGNO(X)))
@@ -214,7 +214,7 @@ extern int target_flags;
 /* Ripped from c4x.h, should be fine */
 #define HARD_REGNO_NREGS(REGNO, MODE) \
     ( (ACC_REGNO_P( REGNO )) ? 1 /* accumulators hold anything */  \
-    : ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD) ) 
+    : ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD) )
 
 #define HARD_REGNO_MODE_OK(REGNO, MODE) c54x_hard_regno_mode_ok(REGNO, MODE)
 
@@ -226,33 +226,34 @@ extern int target_flags;
 
 /* Node: Register Classes */
 enum reg_class
-  {
-    NO_REGS,
-    IMR_REG,
-    IFR_REG,
-    A_REG,
-    T_REG,
-    TRN_REG,
-    SP_REG,
-    BK_REG,
-    BRC_REG,
-    RSA_REG,
-    REA_REG,
-    PMST_REG,
-    XPC_REG,
-    DP_REG,
-    ST_REGS,
-    INT_REGS,
-    STAT_REGS,
-    ACC_REGS,
-    BR_REGS,
-    DBL_OP_REGS,
-    AUX_REGS,
-    MMR_REGS,
-    GENERAL_REGS,
-    ALL_REGS,
-    LIM_REG_CLASSES
-  };
+    {
+        NO_REGS,
+        IMR_REG,
+        IFR_REG,
+        A_REG,
+        T_REG,
+        TRN_REG,
+        SP_REG,
+        BK_REG,
+        BRC_REG,
+        RSA_REG,
+        REA_REG,
+        PMST_REG,
+        XPC_REG,
+        DP_REG,
+        ST_REGS,
+        INT_REGS,
+        STAT_REGS,
+        ACC_REGS,
+        BR_REGS,
+        DBL_OP_REGS,
+        AUX_REGS,
+        AR_SP_REGS,
+        MMR_REGS,
+        GENERAL_REGS,
+        ALL_REGS,
+        LIM_REG_CLASSES
+    };
 
 #define N_REG_CLASSES (int) LIM_REG_CLASSES
 
@@ -279,6 +280,7 @@ enum reg_class
     "BR_REGS",          \
     "DBL_OP_REGS",      \
     "AUX_REGS",         \
+    "ARSP_REGS",        \
     "MMR_REGS",         \
     "GENERAL_REGS",     \
     "ALL_REGS",         \
@@ -306,20 +308,13 @@ enum reg_class
     {0x0020000c}, /* STAT_REGS */ \
     {0x00000030}, /* ACC_REGS */ \
     {0x001c0000}, /* BR_REGS */ \
-    {0x00003C00}, /* DBL_OP_REGS */ \
-    {0x0000FF00}, /* AUX_REGS */ \
-    {0x007fffcf}, /* MMR_REGS */ \
-    {0x011efff0}, /* GENERAL_REGS */ \
-    {0xFFFFFFFF}  /* ALL_REGS */ \
-}
-
-#define BASE_REG_CLASS AUX_REGS
-
-#define INDEX_REG_CLASS AUX_REGS
-
-#define REG_OK_FOR_INDEX_P(X) AUX_REGNO_P(REGNO(X))
-
-#define REG_OK_FOR_BASE_P(X) AUX_REGNO_P(REGNO(X))
+    {0x00003c00}, /* DBL_OP_REGS */ \
+    {0x0000ff00}, /* AUX_REGS */ \
+    {0x0001ff00}, /* ARSP_REGS */
+ {0x007fffcf}, /* MMR_REGS */ \
+     {0x011efff0}, /* GENERAL_REGS */ \
+         {0xffffffff}  /* ALL_REGS */ \
+                                          }
 
 /* Register constraint letters
  *
@@ -398,13 +393,12 @@ enum reg_class
 /* A bunch of stuff about reloading that, as far as I know, I don't need. I very
  * well could be wrong, of course. */
 
-
 /* From c4x.h */
 #define CLASS_MAX_NREGS(CLASS, MODE)   \
     ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD)
 
 #define MODES_TIEABLE_P(MODE1, MODE2) \
-	((MODE1) == (MODE2) || GET_MODE_CLASS (MODE1) == GET_MODE_CLASS (MODE2))
+    ((MODE1) == (MODE2) || GET_MODE_CLASS (MODE1) == GET_MODE_CLASS (MODE2))
 
 /* I might need more than this, but I decdided to err on the side of minimizing
  * bloat.
@@ -426,16 +420,24 @@ extern const enum reg_class regclass_map[FIRST_PSEUDO_REGISTER];
 #define REGNO_REG_CLASS(REGNO) (regclass_map[REGNO])
 
 #define EXTRA_CONSTRAINT(VALUE, C) \
-	( ((C) == 'Y') ? c54x_xmem_p((VALUE), (C)) \
-	: ((C) == 'S') ? c54x_smem_p((VALUE), (C)) \
-	: ((C) == 'T') ? c54x_smem_p((VALUE), (C)) \
-	: ((C) == 'U') ? c54x_dmad_p((VALUE), (C)) \
-	: 0 )
+    ( ((C) == 'Y') ? c54x_xmem_p((VALUE), (C)) \
+    : ((C) == 'S') ? c54x_smem_p((VALUE), (C)) \
+    : ((C) == 'T') ? c54x_smem_p((VALUE), (C)) \
+    : ((C) == 'U') ? c54x_dmad_p((VALUE), (C)) \
+    : 0 )
 
 #define EXTRA_MEMORY_CONSTRAINT(C, STR) \
-	( (C) == 'Y' || (C) == 'S' || (C == 'T') || (C == 'U') )
+    ( (C) == 'Y' || (C) == 'S' || (C == 'T') || (C == 'U') )
 
 #define CONST_DOUBLE_OK_FOR_CONSTRAINT_P(VALUE, C, STR)  1
+
+#define BASE_REG_CLASS ARSP_REGS
+
+#define INDEX_REG_CLASS NO_REGS
+
+#define REG_OK_FOR_INDEX_P(X) AUX_REGNO_P(REGNO(X))
+
+#define REG_OK_FOR_BASE_P(X) AUX_REGNO_P(REGNO(X))
 
 /* Node: Frame Layout */
 /* http://focus.ti.com/lit/ug/spru103g/spru103g.pdf Explains a great deal about the ABI and frame layout */
@@ -484,25 +486,25 @@ extern const enum reg_class regclass_map[FIRST_PSEUDO_REGISTER];
 
 #define INITIAL_ELIMINATION_OFFSET(FROM, TO, OFFSET) \
 do { \
-	int offset = 0; \
-	int regno; \
-	if((FROM) == (ARG_POINTER_REGNUM) && (TO) == (FRAME_POINTER_REGNUM)) { \
-		(OFFSET) = -1; /* We have a fixed offset between the frame pointer and arg pointer */ \
-	} else {  \
+    int offset = 0; \
+    int regno; \
+    if((FROM) == (ARG_POINTER_REGNUM) && (TO) == (FRAME_POINTER_REGNUM)) { \
+        (OFFSET) = -1; /* We have a fixed offset between the frame pointer and arg pointer */ \
+    } else {  \
         /* Otherwise, we start by calculating the difference between the frame pointer  \
          * and stack pointer */ \
-		for(regno = 0; regno < (FIRST_PSEUDO_REGISTER); regno++) { \
-			if(regs_ever_live[regno] != 0 && call_used_regs[regno] == 0) { \
-				/* If we end up here, it means that this register is saved on the stack */ \
-				offset -= 1; \
-			} \
-		} \
+        for(regno = 0; regno < (FIRST_PSEUDO_REGISTER); regno++) { \
+            if(regs_ever_live[regno] != 0 && call_used_regs[regno] == 0) { \
+                /* If we end up here, it means that this register is saved on the stack */ \
+                offset -= 1; \
+            } \
+        } \
         offset -= get_frame_size(); \
         /* offset now contains the difference between the stack pointer \
          * and frame pointer (fp + offset = sp) */ \
         offset += (FROM) == (ARG_POINTER_REGNUM) ? -1 : 0; \
         (OFFSET) = offset; \
-	} \
+    } \
 } while(0);
 
 #define SMALL_REGISTER_CLASSES 1
@@ -512,7 +514,7 @@ do { \
 #define TRAMPOLINE_SIZE 2 /* Just a guess for now */
 
 #define INITIALIZE_TRAMPOLINE(TRAMP, FNADDR, CXT) \
-	c54x_initialize_trampoline((TRAMP), (FNADDR), (CXT))
+    c54x_initialize_trampoline((TRAMP), (FNADDR), (CXT))
 
 /* Node: Passing Function Arguments on the Stack */
 
@@ -526,33 +528,33 @@ do { \
 /* Node: Passing Arguments in Registers */
 
 struct cumul_args {
-	int has_varargs;
-	int numarg;
+    int has_varargs;
+    int numarg;
 };
 
 #define CUMULATIVE_ARGS struct cumul_args
 
 #define INIT_CUMULATIVE_ARGS(CUM, FNTYPE, LIBNAME, FNDECL, N_NAMED_ARGS) \
-	(init_cumulative_args(&(CUM), (FNTYPE), (LIBNAME), (FNDECL)))
+    (init_cumulative_args(&(CUM), (FNTYPE), (LIBNAME), (FNDECL)))
 
 #define FUNCTION_ARG(CUM, MODE, TYPE, NAMED) \
-	(function_arg(&(CUM), (MODE), (TYPE), (NAMED)))
+    (function_arg(&(CUM), (MODE), (TYPE), (NAMED)))
 
 #define FUNCTION_ARG_ADVANCE(CUM, MODE, TYPE, NAMED) \
-	(function_arg_advance(&(CUM), (MODE), (TYPE), (NAMED)))
+    (function_arg_advance(&(CUM), (MODE), (TYPE), (NAMED)))
 
 #define FUNCTION_ARG_REGNO_P(REGNO) (REGNO == A_REGNO)
 
 /* Node: 13.9.8 How Scalar Function Values Are Returned */
 
 #define FUNCTION_VALUE(VALTYPE, FUNC) \
-	gen_rtx_REG(TYPE_MODE(VALTYPE), A_REGNO) /* Values are returned in A */
+    gen_rtx_REG(TYPE_MODE(VALTYPE), A_REGNO) /* Values are returned in A */
 
 #define LIBCALL_VALUE(MODE) \
-	gen_rtx_REG((MODE), A_REGNO)
+    gen_rtx_REG((MODE), A_REGNO)
 
 #define FUNCTION_VALUE_REGNO_P(REGNO) \
-	((REGNO) == A_REGNO)
+    ((REGNO) == A_REGNO)
 
 /* Node: 13.9.12 Generating Code for Profiling */
 
@@ -628,7 +630,7 @@ do { \
 /* Node: 13.19.4 Output and Generation of Labels */
 
 #define ASM_GENERATE_INTERNAL_LABEL(BUFFER, PREFIX, NUM) \
-	sprintf((BUFFER), "*%s%lu?", (PREFIX), (unsigned long)(NUM))
+    sprintf((BUFFER), "*%s%lu?", (PREFIX), (unsigned long)(NUM))
 
 #undef TARGET_ASM_GLOBALIZE_LABEL
 #define TARGET_ASM_GLOBALIZE_LABEL c54x_globalize_label
@@ -649,10 +651,10 @@ do { \
 /* Node: 13.19.10 Assembler Commands for Alignment */
 
 #define ASM_OUTPUT_ALIGN(STREAM, POWER) \
-	fprintf((STREAM), ".align %d", (POWER))
+    fprintf((STREAM), ".align %d", (POWER))
 
 #define ASM_OUTPUT_SKIP(STREAM, NBYTES) \
-	fprintf((STREAM), ".space %d", (int)(NBYTES))
+    fprintf((STREAM), ".space %d", (int)(NBYTES))
 
 /* Node: 13.27 Miscellaneous Parameters */
 
