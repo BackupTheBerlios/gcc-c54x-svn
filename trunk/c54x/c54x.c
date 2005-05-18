@@ -449,13 +449,14 @@ c54x_expand_prologue()
 		}
 	}
 
+	if(get_frame_size() > 0)
+		emit_insn(gen_frame(gen_rtx_REG (QImode, STACK_POINTER_REGNUM),
+							gen_rtx_CONST_INT(VOIDmode, get_frame_size())));
+
 	if(frame_pointer_needed) {
 		emit_move_insn(gen_rtx_REG (QImode,	FRAME_POINTER_REGNUM),
 					   gen_rtx_REG (QImode, STACK_POINTER_REGNUM));
 	}
-
-	emit_insn(gen_frame(gen_rtx_REG (QImode, STACK_POINTER_REGNUM),
-						gen_rtx_CONST_INT(VOIDmode, get_frame_size())));
 }
 
 void
@@ -463,8 +464,9 @@ c54x_expand_epilogue()
 {
 	int r;
 
-	emit_insn(gen_frame(gen_rtx_REG (QImode, STACK_POINTER_REGNUM),
-						gen_rtx_CONST_INT(VOIDmode, -get_frame_size())));
+	if(get_frame_size() > 0)
+		emit_insn(gen_frame(gen_rtx_REG (QImode, STACK_POINTER_REGNUM),
+							gen_rtx_CONST_INT(VOIDmode, -get_frame_size())));
 
 	for(r = FIRST_PSEUDO_REGISTER - 1; r > 0; r--) {
 		if(c54x_save_register_p(r)) {
@@ -478,7 +480,7 @@ c54x_expand_epilogue()
 int
 c54x_save_register_p(int regno)
 {
-/* 	assert(regno <= FIRST_PSEUDO_REGISTER); */
+	gcc_assert(regno <= FIRST_PSEUDO_REGISTER);
 
 	return regs_ever_live[regno] && !call_used_regs[regno];
 }
@@ -490,36 +492,36 @@ c54x_file_start(void)
 	fprintf(asm_out_file, "\t.mmregs\n");
 }
 
-/* #define ELIMINABLE_REGS  \ */
-/*   {{ARG_POINTER_REGNUM, STACK_POINTER_REGNUM}, \ */
-/*   {ARG_POINTER_REGNUM, FRAME_POINTER_REGNUM}, \ */
-/*   {FRAME_POINTER_REGNUM, STACK_POINTER_REGNUM}} */
-
 int
 c54x_initial_elimination_offset(int from, int to)
 {
-	int aptofp = -1;
-	int fptosp = -get_frame_size();
+	/* {ARG_POINTER_REGNUM, STACK_POINTER_REGNUM}   */
+	/* {ARG_POINTER_REGNUM, FRAME_POINTER_REGNUM}   */
+	/* {FRAME_POINTER_REGNUM, STACK_POINTER_REGNUM} */
+	int aptospfp = get_frame_size() + 1;
 	int offset = 0xdead;
 	int regno;
 
 	for(regno=0; regno < FIRST_PSEUDO_REGISTER; regno++) {
 		if(c54x_save_register_p(regno)) {
-			aptofp--;
+			aptospfp++;
 		}
 	}
 
-	if(from == ARG_POINTER_REGNUM && to == STACK_POINTER_REGNUM) {
-		offset = aptofp + fptosp;
-	} else if(from == ARG_POINTER_REGNUM && to == FRAME_POINTER_REGNUM) {
-		offset = aptofp;
+	if( (from == ARG_POINTER_REGNUM && to == STACK_POINTER_REGNUM)
+		|| (from == ARG_POINTER_REGNUM && to == FRAME_POINTER_REGNUM) )	{
+		offset = aptospfp;
 	} else if(from == FRAME_POINTER_REGNUM && to == STACK_POINTER_REGNUM) {
-		offset = fptosp;
+		offset = 0;
 	}
 
 	gcc_assert(offset != 0xdead);
 
+	/* Im not sure which direction the offset is in:
+	   from/to seems suggestive */
+	offset = -offset;
+
 	fprintf(stderr, "\n%s:%s = %d\n\n", reg_names[from], reg_names[to], offset);
 
-	return -offset;
+	return offset;
 }
