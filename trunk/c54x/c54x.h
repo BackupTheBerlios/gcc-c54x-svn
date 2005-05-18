@@ -160,6 +160,8 @@ extern int target_flags;
     IN_REG_RANGE_P(REGNO, T_REGNO, T_REGNO)
 #define DP_REGNO_P(REGNO) \
     IN_REG_RANGE_P(REGNO, DP_REGNO, DP_REGNO)
+#define ARG_REGNO_P(REGNO) \
+    IN_REG_RANGE_P(REGNO, ARG_REGNO, ARG_REGNO)
 #define SP_REGNO_P(REGNO) \
     IN_REG_RANGE_P(REGNO, SP_REGNO, SP_REGNO)
 #define ARSP_REGNO_P(REGNO) \
@@ -169,13 +171,14 @@ extern int target_flags;
 #define XMEM_REGNO_P(REGNO) \
     IN_REG_RANGE_P(REGNO, AR2_REGNO, AR5_REGNO)
 #define MMR_REGNO_P(REGNO) \
-    (AUX_REGNO_P(REGNO) || ST_REGNO_P(REGNO) || T_REGNO_P(REGNO))
+    (AUX_REGNO_P(REGNO) || ST_REGNO_P(REGNO) || T_REGNO_P(REGNO) || ARG_REGNO_P(REGNO))
 
 #define AUX_REG_P(X)    (REG_P(X) && AUX_REGNO_P(REGNO(X)))
 #define ACC_REG_P(X)    (REG_P(X) && ACC_REGNO_P(REGNO(X)))
 #define ST_REG_P(X)     (REG_P(X) && ST_REGNO_P(REGNO(X)))
 #define T_REG_P(X)      (REG_P(X) && T_REGNO_P(REGNO(X)))
 #define DP_REG_P(X)     (REG_P(X) && DP_REGNO_P(REGNO(X)))
+#define ARG_REG_P(X)    (REG_P(X) && ARG_REGNO_P(REGNO(X)))
 #define SP_REG_P(X)     (REG_P(X) && SP_REGNO_P(REGNO(X)))
 #define ARSP_REG_P(X)   (REG_P(X) && ARSP_REGNO_P(REGNO(X)))
 #define PSEUDO_REG_P(X) (REG_P(X) && PSEUDO_REGNO_P(REGNO(X)))
@@ -215,10 +218,12 @@ extern int target_flags;
 /* Node: Values in Registers */
 
 #define HARD_REGNO_NREGS(REGNO, MODE) \
-    ( (ACC_REGNO_P( REGNO )) ? (GET_MODE_SIZE (MODE) + (2*UNITS_PER_WORD) - 1) / (2*UNITS_PER_WORD) \
-    : ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD) )
+ ( (ACC_REGNO_P( REGNO )) ? 1 /* accumulators hold anything */  \
+: ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD) )
+/*     ( (ACC_REGNO_P( REGNO )) ? (GET_MODE_SIZE (MODE) + (2*UNITS_PER_WORD) - 1) / (2*UNITS_PER_WORD) \ */
+/*     : ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD) ) */
 
-#define HARD_REGNO_MODE_OK (REGNO, MODE) c54x_hard_regno_mode_ok(REGNO, MODE)
+#define HARD_REGNO_MODE_OK(REGNO, MODE) c54x_hard_regno_mode_ok(REGNO, MODE)
 
 #define MODES_TIEABLE_P(MODE1, MODE2) \
     ((MODE1) == (MODE2) || GET_MODE_CLASS (MODE1) == GET_MODE_CLASS (MODE2))
@@ -391,11 +396,12 @@ enum reg_class
  * well could be wrong, of course. */
 
 /* FIXME: This needs help */
+/* #define CLASS_MAX_NREGS(CLASS, MODE)   \ */
+/*     ( (CLASS == ACC_REGS) ? 2 /\* 32 bit in 2 32bit registers *\/ \ */
+/*                           : 4 /\* 64 bit in 4 16bit registers *\/ \ */
+/*     ) */
 #define CLASS_MAX_NREGS(CLASS, MODE)   \
-    ( (CLASS == ACC_REGS) ? 1 /* 32 bit in 1 32bit registers */ \
-                          : 4 /* 64 bit in 4 16bit registers */ \
-    )
-/*    ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD) */
+   ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD)
 
 
 #define IN_RANGE_P(val, bottom, top) \
@@ -407,7 +413,8 @@ enum reg_class
     : ((c) == 'K') ? IN_RANGE_P (value, 0, 15)         \
     : ((c) == 'L') ? IN_RANGE_P (value, -16, 15)       \
     : ((c) == 'M') ? IN_RANGE_P (value, 0, 511)        \
-    : ((c) == 'O') ? IN_RANGE_P (value, 0, 255)     \
+    : ((c) == 'O') ? IN_RANGE_P (value, 0, 255)        \
+	: ((c) == 'P') ? IN_RANGE_P (value, -128, 127)     \
     : 0 )
 
 extern const enum reg_class regclass_map[FIRST_PSEUDO_REGISTER];

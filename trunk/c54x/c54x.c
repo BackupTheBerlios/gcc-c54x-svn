@@ -158,9 +158,6 @@ legitimate_address_p (enum machine_mode mode, rtx addr, int strict)
 		break;
 	case PRE_DEC:
 	case POST_INC:
-		/* base = XEXP(addr, 0); */
-/* 		valid = SP_REG_P(base) || AUX_REG_P(base) || ((!strict && PSEUDO_REG_P(base))); */
-/* 		break; */
 	case PRE_INC:
 	case POST_DEC:
 		base = XEXP(addr, 0);
@@ -169,7 +166,7 @@ legitimate_address_p (enum machine_mode mode, rtx addr, int strict)
 	case CONST:
 	case CONST_INT:
 	case SYMBOL_REF:
-	case LABEL_REF:
+/* 	case LABEL_REF: */
 		valid = 1;
 		break;
 	default:
@@ -214,7 +211,9 @@ c54x_expand_movqi(rtx ops[])
 			done = 2;
 		}
 
-	} else if(REG_P(ops[0]) && (GET_CODE(ops[1]) == MEM && REG_P(XEXP(ops[1],0)))) {
+	} else if( (REG_P(ops[0]) && (GET_CODE(ops[1]) == MEM && REG_P(XEXP(ops[1],0))))
+			   || (T_REG_P(ops[0]) && ARSP_REG_P(ops[1])) )
+	{
 		done = 2;
 	}
 	
@@ -336,7 +335,7 @@ c54x_smem_p(rtx value, char letter)
 
 	if(!valid) {
 		print_rtl(stderr, addr);
-		fprintf(stderr, ": Smem\n");
+		fprintf(stderr, ": mem\n");
 	}
 
 	return valid;
@@ -384,7 +383,7 @@ c54x_print_operand(FILE *stream, rtx op, char letter)
 		break;
 	case CONST_INT:
 		if(letter == 'I') {
-			fprintf(stream, "0%xh", 0xffff & XINT(op, 0));
+			fprintf(stream, "#0%xh", 0xffff & XINT(op, 0));
 		} else {
 			fprintf(stream, "%d", XINT(op, 0));
 		}
@@ -427,11 +426,56 @@ c54x_print_operand_address(FILE *stream, rtx addr)
 	switch(GET_CODE(value)) {
 	case SYMBOL_REF:
 	case LABEL_REF:
-		fprintf(stream, "%s", XSTR(value, 0));
+		fprintf(stream, "addr:%s", XSTR(value, 0));
 		break;
 	default:
 		fprintf(stream, "addr:");
 		print_rtl(stream, value);
 		break;
 	}
+}
+
+void
+c54x_expand_prologue()
+{
+	int r;
+
+	for(r = 0; r < FIRST_PSEUDO_REGISTER; r++) {
+		if(c54x_save_register_p(r)) {
+			emit_insn(gen_pushqi(gen_rtx_REG(QImode, r)));
+		}
+	}
+
+	if(frame_pointer_needed) {
+		emit_move_insn(gen_rtx_REG (QImode,	FRAME_POINTER_REGNUM),
+					   gen_rtx_REG (QImode, STACK_POINTER_REGNUM));
+	}
+
+	emit_insn(gen_frame(gen_rtx_REG (QImode, STACK_POINTER_REGNUM),
+						gen_rtx_CONST_INT(VOIDmode, get_frame_size())));
+}
+
+void
+c54x_expand_epilogue()
+{
+	int r;
+
+	emit_insn(gen_frame(gen_rtx_REG (QImode, STACK_POINTER_REGNUM),
+						gen_rtx_CONST_INT(VOIDmode, -get_frame_size())));
+
+	for(r = FIRST_PSEUDO_REGISTER - 1; r > 0; r--) {
+		if(c54x_save_register_p(r)) {
+			emit_insn(gen_popqi(gen_rtx_REG(QImode, r)));
+		}
+	}
+
+	emit_insn(gen_return());
+}
+
+int
+c54x_save_register_p(int regno)
+{
+/* 	assert(regno <= FIRST_PSEUDO_REGISTER); */
+
+	return regs_ever_live[regno] && !call_used_regs[regno];
 }
