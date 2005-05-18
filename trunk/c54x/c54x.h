@@ -456,7 +456,7 @@ extern const enum reg_class regclass_map[FIRST_PSEUDO_REGISTER];
 
 #define STACK_POINTER_OFFSET -1 /* Arguments start just below SP */
 
-#define FIRST_PARM_OFFSET(FUNCDECL) 0
+#define FIRST_PARM_OFFSET(FUNCDECL) 0 /* Argument pointer points to the first(lower) argument */
 
 /* Node: Exception Handling */
 /* ??? */
@@ -487,27 +487,7 @@ extern const enum reg_class regclass_map[FIRST_PSEUDO_REGISTER];
 #define CAN_ELIMINATE(FROM, TO) 1
 
 #define INITIAL_ELIMINATION_OFFSET(FROM, TO, OFFSET) \
-do { \
-    int offset = 0; \
-    int regno; \
-    if((FROM) == (ARG_POINTER_REGNUM) && (TO) == (FRAME_POINTER_REGNUM)) { \
-        (OFFSET) = -1; /* We have a fixed offset between the frame pointer and arg pointer */ \
-    } else {  \
-        /* Otherwise, we start by calculating the difference between the frame pointer  \
-         * and stack pointer */ \
-        for(regno = 0; regno < (FIRST_PSEUDO_REGISTER); regno++) { \
-            if(regs_ever_live[regno] != 0 && call_used_regs[regno] == 0) { \
-                /* If we end up here, it means that this register is saved on the stack */ \
-                offset -= 1; \
-            } \
-        } \
-        offset -= get_frame_size(); \
-        /* offset now contains the difference between the stack pointer \
-         * and frame pointer (fp + offset = sp) */ \
-        offset += (FROM) == (ARG_POINTER_REGNUM) ? -1 : 0; \
-        (OFFSET) = offset; \
-    } \
-} while(0);
+	((OFFSET) = c54x_initial_elimination_offset((FROM), (TO)))
 
 #define SMALL_REGISTER_CLASSES 1
 

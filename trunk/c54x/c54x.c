@@ -55,19 +55,19 @@ enum reg_class const regclass_map[FIRST_PSEUDO_REGISTER] =
     {
         /* IMR      IFR      ST0      ST1 */
            IMR_REG, IFR_REG, ST_REGS, ST_REGS,
-           
+
         /* A      B         T      TRN */
            A_REG, ACC_REGS, T_REG, TRN_REG,
-           
+
         /* AR0       AR1 */
            AUX_REGS, AUX_REGS,
-           
+
         /* AR2          AR3          AR4          AR5  */
            DBL_OP_REGS, DBL_OP_REGS, DBL_OP_REGS, DBL_OP_REGS,
-           
+
         /* AR6       AR7       SP      BK      BRC */
            AUX_REGS, AUX_REGS, SP_REG, BK_REG, BRC_REG,
-           
+
         /* RSA      REA      PMST      XPC      DP      ARG */
            RSA_REG, REA_REG, PMST_REG, XPC_REG, DP_REG, GENERAL_REGS
     };
@@ -121,7 +121,9 @@ function_arg (CUMULATIVE_ARGS *cum, enum machine_mode mode, tree type, int named
 {
 	rtx ret = NULL_RTX;
 
-	if(cum->numarg == 0 && mode != VOIDmode && cum->has_varargs == false) {
+	if(cum->numarg == 0
+	   && (mode == HImode || mode == PSImode || mode == HImode)
+	   && cum->has_varargs == false) {
 		ret = gen_rtx_REG(mode, A_REGNO);
 	}
 
@@ -139,7 +141,7 @@ legitimate_address_p (enum machine_mode mode, rtx addr, int strict)
 {
 	int valid=0;
 	rtx base, index;
-	
+
 	switch(GET_CODE(addr)) {
 	case REG:
 		valid = (AUX_REG_P(addr) || SP_REG_P(addr) || (!strict && PSEUDO_REG_P(addr)));
@@ -172,10 +174,10 @@ legitimate_address_p (enum machine_mode mode, rtx addr, int strict)
 	default:
 		break;
 	}
-	
+
 	print_rtl(stderr, addr);
 	fprintf(stderr, " valid: %s, strict: %s\n", (valid ? "yes" : "no"), (strict ? "yes" : "no" ));
-	
+
 	return valid;
 }
 
@@ -191,7 +193,7 @@ c54x_expand_movqi(rtx ops[])
 	}
 	fprintf(stderr, "<<<---\n");
 
-	
+
 	if(ACC_REG_P(ops[0])) {
 		ops[0] = copy_rtx(ops[0]);
 		PUT_MODE(ops[0], PSImode);
@@ -217,12 +219,12 @@ c54x_expand_movqi(rtx ops[])
 	{
 		done = 2;
 	}
-	
+
 	return done;
 }
 
 void
-c54x_expand_addqi(rtx ops[]) 
+c54x_expand_addqi(rtx ops[])
 {
 	int i;
 
@@ -362,7 +364,7 @@ c54x_dmad_p(rtx value, char letter)
 	default:
 		break;
 	}
-	
+
 	if(valid) {
 		print_rtl(stderr, addr);
 		fprintf(stderr, ": dmad\n");
@@ -377,7 +379,7 @@ c54x_print_operand(FILE *stream, rtx op, char letter)
 	rtx mem;
 	rtx base;
 	rtx disp;
-	
+
 	switch(GET_CODE(op)) {
 	case REG:
 		fprintf(stream, "%s", reg_names[REGNO(op)]);
@@ -486,4 +488,38 @@ c54x_file_start(void)
 {
 	default_file_start();
 	fprintf(asm_out_file, "\t.mmregs\n");
+}
+
+/* #define ELIMINABLE_REGS  \ */
+/*   {{ARG_POINTER_REGNUM, STACK_POINTER_REGNUM}, \ */
+/*   {ARG_POINTER_REGNUM, FRAME_POINTER_REGNUM}, \ */
+/*   {FRAME_POINTER_REGNUM, STACK_POINTER_REGNUM}} */
+
+int
+c54x_initial_elimination_offset(int from, int to)
+{
+	int aptofp = -1;
+	int fptosp = -get_frame_size();
+	int offset = 0xdead;
+	int regno;
+
+	for(regno=0; regno < FIRST_PSEUDO_REGISTER; regno++) {
+		if(c54x_save_register_p(regno)) {
+			aptofp--;
+		}
+	}
+
+	if(from == ARG_POINTER_REGNUM && to == STACK_POINTER_REGNUM) {
+		offset = aptofp + fptosp;
+	} else if(from == ARG_POINTER_REGNUM && to == FRAME_POINTER_REGNUM) {
+		offset = aptofp;
+	} else if(from == FRAME_POINTER_REGNUM && to == STACK_POINTER_REGNUM) {
+		offset = fptosp;
+	}
+
+	gcc_assert(offset != 0xdead);
+
+	fprintf(stderr, "\n%s:%s = %d\n\n", reg_names[from], reg_names[to], offset);
+
+	return -offset;
 }
