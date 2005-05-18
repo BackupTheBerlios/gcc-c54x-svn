@@ -212,7 +212,8 @@ c54x_expand_movqi(rtx ops[])
 		}
 
 	} else if( (REG_P(ops[0]) && (GET_CODE(ops[1]) == MEM && REG_P(XEXP(ops[1],0))))
-			   || (T_REG_P(ops[0]) && ARSP_REG_P(ops[1])) )
+			   || (T_REG_P(ops[0]) && ARSP_REG_P(ops[1]))
+			   || (MEM_P(ops[0]) && ARSP_REG_P(ops[1])) )
 	{
 		done = 2;
 	}
@@ -393,7 +394,7 @@ c54x_print_operand(FILE *stream, rtx op, char letter)
 		switch(GET_CODE(mem)) {
 		case LABEL_REF:
 		case SYMBOL_REF:
-			fprintf(stream, "%s", XSTR(mem, 0));
+			fprintf(stream, "*(%s)", XSTR(mem, 0));
 			break;
 		case REG:
 			fprintf(stream, "*%s", reg_names[REGNO(mem)]);
@@ -478,4 +479,11 @@ c54x_save_register_p(int regno)
 /* 	assert(regno <= FIRST_PSEUDO_REGISTER); */
 
 	return regs_ever_live[regno] && !call_used_regs[regno];
+}
+
+void
+c54x_file_start(void)
+{
+	default_file_start();
+	fprintf(asm_out_file, "\t.mmregs\n");
 }

@@ -610,7 +610,9 @@ do { \
     goto LABEL; \
 } while(0);
 
-#define CONSTANT_ADDRESS_P(X) (GET_CODE (X) == SYMBOL_REF)
+#define CONSTANT_ADDRESS_P(X) \
+    (GET_CODE (X) == LABEL_REF || GET_CODE (X) == SYMBOL_REF \
+     || GET_CODE (X) == CONST_INT || GET_CODE (X) == CONST)
 
 /* Node: 13.15 Describing Relative Costs of Operations */
 
@@ -625,6 +627,9 @@ do { \
 
 #define ASM_APP_ON  "#APP"
 #define ASM_APP_OFF "#NO_APP"
+
+#undef  TARGET_ASM_FILE_START
+#define TARGET_ASM_FILE_START c54x_file_start
 
 /* Node: 13.19.3 Output of Uninitialized Variables */
 
@@ -644,7 +649,7 @@ do { \
 /* Node: 13.19.4 Output and Generation of Labels */
 
 #define ASM_GENERATE_INTERNAL_LABEL(BUFFER, PREFIX, NUM) \
-    sprintf((BUFFER), "*%s%lu?", (PREFIX), (unsigned long)(NUM))
+    sprintf((BUFFER), "%s%lu?", (PREFIX), (unsigned long)(NUM))
 
 #undef TARGET_ASM_GLOBALIZE_LABEL
 #define TARGET_ASM_GLOBALIZE_LABEL c54x_globalize_label

@@ -37,3 +37,4 @@ extern void c54x_print_operand_address(FILE*, rtx);
 extern void c54x_expand_prologue(void);
 extern void c54x_expand_epilogue(void);
 extern int  c54x_save_register_p(int);
+extern void c54x_file_start(void);
