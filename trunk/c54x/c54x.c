@@ -223,9 +223,10 @@ c54x_expand_movqi(rtx ops[])
 	return done;
 }
 
-void
+int
 c54x_expand_addqi(rtx ops[])
 {
+	int done = 0;
 	int i;
 
 	fprintf(stderr, "---<<<");
@@ -238,7 +239,14 @@ c54x_expand_addqi(rtx ops[])
 	   && SP_REG_P(ops[1])
 	   && (GET_CODE(ops[2]) == CONST_INT)) {
 		emit_insn(gen_frame(ops[0], ops[2]));
+		done = 1;
+	} else if(MEM_P(ops[1]) && MEM_P(ops[2])) {
+		ops[0] = c54x_change_rtx_mode(ops[0], PSImode);
+		emit_insn(gen_add_xmem(ops[0], ops[1], ops[2]));
+		done = 1;
 	}
+
+	return done;
 }
 
 void
@@ -524,4 +532,15 @@ c54x_initial_elimination_offset(int from, int to)
 	fprintf(stderr, "\n%s:%s = %d\n\n", reg_names[from], reg_names[to], offset);
 
 	return offset;
+}
+
+rtx
+c54x_change_rtx_mode(rtx x, enum machine_mode mode)
+{
+	rtx ret;
+
+	ret = copy_rtx(x);
+	PUT_MODE(ret, mode);
+
+	return ret;
 }
