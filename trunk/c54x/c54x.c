@@ -56,8 +56,8 @@ enum reg_class const regclass_map[FIRST_PSEUDO_REGISTER] =
         /* IMR      IFR      ST0      ST1 */
            IMR_REG, IFR_REG, ST_REGS, ST_REGS,
 
-        /* A      B         T      TRN */
-           A_REG, ACC_REGS, T_REG, TRN_REG,
+        /* A      B      T      TRN */
+           A_REG, B_REG, T_REG, TRN_REG,
 
         /* AR0       AR1 */
            AUX_REGS, AUX_REGS,
@@ -246,7 +246,7 @@ c54x_expand_addqi(rtx ops[])
 	} else if( MEM_P(ops[1]) && MEM_P(ops[2]) && !no_new_pseudos ) {
 		tmp = gen_reg_rtx(PSImode);
 		emit_insn(gen_add_xmem(tmp, ops[1], ops[2]));
-		emit_insn(gen_stlm(ops[0], tmp));
+		emit_insn(gen_sth(ops[0], tmp));
 		done = 1;
 	}
 

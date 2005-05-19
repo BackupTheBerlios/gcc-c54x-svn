@@ -241,6 +241,7 @@ enum reg_class
     IMR_REG,
     IFR_REG,
     A_REG,
+    B_REG,
     T_REG,
     TRN_REG,
     SP_REG,
@@ -273,6 +274,7 @@ enum reg_class
     "IMR_REG",          \
     "IFR_REG",          \
     "A_REG",            \
+    "B_REG",            \
     "T_REG",            \
     "TRN_REG",          \
     "SP_REG",           \
@@ -303,6 +305,7 @@ enum reg_class
     {0x00000001}, /* IMR_REG */ \
     {0x00000002}, /* IFR_REG */ \
     {0x00000010}, /* A_REG */ \
+    {0x00000020}, /* B_REG */ \
     {0x00000040}, /* T_REG */ \
     {0x00000080}, /* TRN_REG */ \
     {0x00010000}, /* SP_REG */ \
@@ -329,6 +332,7 @@ enum reg_class
 /* Register constraint letters
  *
  * a - Accum. A
+ * b - Accum. B
  * c - Accums
  * d - AR0
  * e - AUX_REGS
@@ -371,6 +375,7 @@ enum reg_class
 #define REG_CLASS_FROM_LETTER(c)  \
     \
     ( ((c) == 'a') ? A_REG         \
+    : ((c) == 'b') ? B_REG         \
     : ((c) == 'c') ? ACC_REGS      \
     : ((c) == 'e') ? AUX_REGS      \
     : ((c) == 'f') ? T_REG         \
