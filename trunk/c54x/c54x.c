@@ -175,8 +175,8 @@ legitimate_address_p (enum machine_mode mode, rtx addr, int strict)
 		break;
 	}
 
-	print_rtl(stderr, addr);
-	fprintf(stderr, " valid: %s, strict: %s\n", (valid ? "yes" : "no"), (strict ? "yes" : "no" ));
+/* 	print_rtl(stderr, addr); */
+/* 	fprintf(stderr, " valid: %s, strict: %s\n", (valid ? "yes" : "no"), (strict ? "yes" : "no" )); */
 
 	return valid;
 }
@@ -184,40 +184,35 @@ legitimate_address_p (enum machine_mode mode, rtx addr, int strict)
 int
 c54x_expand_movqi(rtx ops[])
 {
-	int done = 0;
+	int done = 2;
 	int i;
+	rtx tmp, tmp2;
 
-	fprintf(stderr, "--->>>");
+	fprintf(stderr, "-%s--movqi:", no_new_pseudos?"noP":"P");
 	for(i=0; i < 2; i++) {
 		print_rtl(stderr, ops[i]);
 	}
-	fprintf(stderr, "<<<---\n");
+	fprintf(stderr, "--\n");
 
-
-	if(ACC_REG_P(ops[0])) {
-		ops[0] = copy_rtx(ops[0]);
-		PUT_MODE(ops[0], PSImode);
-		fprintf(stderr, "+++");
-		print_rtl(stderr, ops[0]);
-		fprintf(stderr, "+++\n");
-
+	if( (ARSP_REG_P(ops[0])||PSEUDO_REG_P(ops[0]))
+		&& (ARSP_REG_P(ops[1])||PSEUDO_REG_P(ops[1])) ) {
+		emit_insn(gen_mvmm(ops[0], ops[1]));
 		done = 1;
-
-		if(MEM_P(ops[1])) {
-			emit_insn(gen_ldm(ops[0], ops[1]));
-		} else if(REG_P(ops[1])) {
-			emit_insn(gen_ldu(ops[0], ops[1]));
-		} else if(CONSTANT_P(ops[1])) {
-			emit_insn(gen_ld_const(ops[0], ops[1], gen_reg_rtx(QImode)));
-		} else {
-			done = 2;
-		}
-
-	} else if( (REG_P(ops[0]) && (GET_CODE(ops[1]) == MEM && REG_P(XEXP(ops[1],0))))
-			   || (T_REG_P(ops[0]) && ARSP_REG_P(ops[1]))
-			   || (MEM_P(ops[0]) && ARSP_REG_P(ops[1])) )
-	{
-		done = 2;
+	} else if( ACC_REG_P(ops[0]) && REG_P(ops[1]) && !no_new_pseudos ) {
+		tmp = gen_reg_rtx(PSImode);
+		emit_insn(gen_ldm(tmp, ops[1]));
+		emit_insn(gen_stlm(ops[0], tmp));
+		done = 1;
+	} else if( ACC_REG_P(ops[0]) && MEM_P(ops[1]) && !no_new_pseudos) {
+		tmp = gen_reg_rtx(PSImode);
+		emit_insn(gen_ldu(tmp, ops[1]));
+		emit_insn(gen_stl(ops[0], tmp));
+		done = 1;
+	} else if( REG_P(ops[0]) && ACC_REG_P(ops[1]) && !no_new_pseudos) {
+		tmp = gen_reg_rtx(PSImode);
+		emit_insn(gen_ldm(tmp, ops[1]));
+		emit_insn(gen_stlm(ops[0], tmp));
+		done = 1;
 	}
 
 	return done;
@@ -228,21 +223,30 @@ c54x_expand_addqi(rtx ops[])
 {
 	int done = 0;
 	int i;
+	rtx tmp, tmp2;
 
-	fprintf(stderr, "---<<<");
+	fprintf(stderr, "-%s--addqi:", no_new_pseudos?"noP":"P");
 	for(i=0; i < 3; i++) {
 		print_rtl(stderr, ops[i]);
 	}
-	fprintf(stderr, ">>>---\n");
+	fprintf(stderr, "--\n");
 
-	if(SP_REG_P(ops[0])
-	   && SP_REG_P(ops[1])
-	   && (GET_CODE(ops[2]) == CONST_INT)) {
-		emit_insn(gen_frame(ops[0], ops[2]));
+	if(REG_P(ops[1]) && !no_new_pseudos) {
+		tmp = gen_reg_rtx(PSImode);
+		emit_insn(gen_ldm(tmp, ops[1]));
+		if(REG_P(ops[2])) {
+			tmp2 = gen_reg_rtx(PSImode);
+			emit_insn(gen_ldm(tmp2, ops[2]));
+			emit_insn(gen_add_accs(tmp, tmp2));
+		} else {
+			emit_insn(gen_add(tmp, ops[2]));
+		}
+		emit_insn(gen_stlm(ops[0], tmp));
 		done = 1;
-	} else if(MEM_P(ops[1]) && MEM_P(ops[2])) {
-		ops[0] = c54x_change_rtx_mode(ops[0], PSImode);
-		emit_insn(gen_add_xmem(ops[0], ops[1], ops[2]));
+	} else if( MEM_P(ops[1]) && MEM_P(ops[2]) && !no_new_pseudos ) {
+		tmp = gen_reg_rtx(PSImode);
+		emit_insn(gen_add_xmem(tmp, ops[1], ops[2]));
+		emit_insn(gen_stlm(ops[0], tmp));
 		done = 1;
 	}
 
@@ -318,10 +322,10 @@ c54x_smem_p(rtx value, char letter)
 		break;
 	case PRE_INC:
 		/* Allowed only on a write operand */
-		valid = AUX_REGNO_P(REGNO(XEXP(addr, 0))) && letter == 'T';
+		valid = (AUX_REG_P(XEXP(addr, 0))||PSEUDO_REG_P(XEXP(addr, 0))) && letter == 'T';
 		break;
 	case REG:
-		valid = AUX_REGNO_P(REGNO(addr));
+		valid = AUX_REG_P(addr)||PSEUDO_REG_P(addr);
 		break;
 	case CONST:
 	case CONST_INT:
@@ -334,10 +338,10 @@ c54x_smem_p(rtx value, char letter)
 
 		valid =
 			/* Indirect + offset Smem addressing */
-			(AUX_REG_P(base)
+			((AUX_REG_P(base)||PSEUDO_REG_P(base))
 				 && (GET_CODE(index) == CONST_INT) && IN_RANGE_P(XINT(index, 0), -32768, 65535))
 			/* Direct, offset from SP (cpl=1) */
-			|| (SP_REG_P(base)
+			|| ((SP_REG_P(base)||PSEUDO_REG_P(base))
 				&& (GET_CODE(index) == CONST_INT) && IN_RANGE_P(XINT(index, 0), 0, 128));
 		break;
 	default:
