@@ -64,7 +64,7 @@ extern int target_flags;
 #define MINIMUM_ATOMIC_ALIGNMENT BITS_PER_WORD
 #define EMPTY_FIELD_BOUNDARY     BITS_PER_WORD
 #define STRICT_ALIGNMENT         1  /* Nothing is smaller than alignment.. */
-#define MAX_FIXED_MODE_SIZE      32 /* HImode, same as c4x */
+#define MAX_FIXED_MODE_SIZE      40 /* HImode, same as c4x */
 /* VECTOR_MODE_SUPPORTED? */
 
 /* Node: Type Layout */

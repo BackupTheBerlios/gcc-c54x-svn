@@ -84,7 +84,7 @@ c54x_hard_regno_mode_ok (unsigned int regno, enum machine_mode mode)
 		valid =  (AUX_REGNO_P(regno) || ACC_REGNO_P(regno)
 				  || SP_REGNO_P(regno) || T_REGNO_P(regno));
 		break;
-	case PSImode:
+	case ACCmode:
 	case HImode:
 		valid = ACC_REGNO_P(regno);
 		break;
@@ -122,7 +122,7 @@ function_arg (CUMULATIVE_ARGS *cum, enum machine_mode mode, tree type, int named
 	rtx ret = NULL_RTX;
 
 	if(cum->numarg == 0
-	   && (mode == HImode || mode == PSImode || mode == HImode)
+	   && (mode == HImode || mode == ACCmode || mode == HImode)
 	   && cum->has_varargs == false) {
 		ret = gen_rtx_REG(mode, A_REGNO);
 	}
@@ -199,17 +199,17 @@ c54x_expand_movqi(rtx ops[])
 		emit_insn(gen_mvmm(ops[0], ops[1]));
 		done = 1;
 	} else if( ACC_REG_P(ops[0]) && REG_P(ops[1]) && !no_new_pseudos ) {
-		tmp = gen_reg_rtx(PSImode);
+		tmp = gen_reg_rtx(ACCmode);
 		emit_insn(gen_ldm(tmp, ops[1]));
 		emit_insn(gen_stlm(ops[0], tmp));
 		done = 1;
 	} else if( ACC_REG_P(ops[0]) && MEM_P(ops[1]) && !no_new_pseudos) {
-		tmp = gen_reg_rtx(PSImode);
+		tmp = gen_reg_rtx(ACCmode);
 		emit_insn(gen_ldu(tmp, ops[1]));
 		emit_insn(gen_stl(ops[0], tmp));
 		done = 1;
 	} else if( REG_P(ops[0]) && ACC_REG_P(ops[1]) && !no_new_pseudos) {
-		tmp = gen_reg_rtx(PSImode);
+		tmp = gen_reg_rtx(ACCmode);
 		emit_insn(gen_ldm(tmp, ops[1]));
 		emit_insn(gen_stlm(ops[0], tmp));
 		done = 1;
@@ -221,7 +221,7 @@ c54x_expand_movqi(rtx ops[])
 int
 c54x_expand_addqi(rtx ops[])
 {
-	int done = 0;
+	int done = 2;
 	int i;
 	rtx tmp, tmp2;
 
@@ -231,13 +231,16 @@ c54x_expand_addqi(rtx ops[])
 	}
 	fprintf(stderr, "--\n");
 
-	if(REG_P(ops[1])) {
-		ops[1] = convert_to_mode(PSImode, ops[1], 0);
+	if(SP_REG_P(ops[0]) && SP_REG_P(ops[1]) && CONSTANT_P(ops[2])) {
+		emit_insn(gen_frame(ops[0], ops[2]));
+		done = 1;
+	}else if(REG_P(ops[1])) {
+		ops[1] = convert_to_mode(ACCmode, ops[1], 0);
 
 		if( MEM_P(ops[2]) || CONSTANT_P(ops[2]) ) {
 			emit_insn(gen_add(ops[1], ops[2]));
 		} else {
-			ops[2] = convert_to_mode(PSImode, ops[2], 0);
+			ops[2] = convert_to_mode(ACCmode, ops[2], 0);
 			emit_insn(gen_add_accs(ops[1], ops[2]));
 		}
 		ops[1] = convert_to_mode(QImode, ops[1], 0);
