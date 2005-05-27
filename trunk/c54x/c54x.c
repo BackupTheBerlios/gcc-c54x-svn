@@ -221,7 +221,7 @@ c54x_expand_movqi(rtx ops[])
 int
 c54x_expand_addqi(rtx ops[])
 {
-	int done = 2;
+	int done = 0;
 	int i;
 	rtx tmp, tmp2;
 
