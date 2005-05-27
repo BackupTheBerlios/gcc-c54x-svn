@@ -231,22 +231,21 @@ c54x_expand_addqi(rtx ops[])
 	}
 	fprintf(stderr, "--\n");
 
-	if(REG_P(ops[1]) && !no_new_pseudos) {
-		tmp = gen_reg_rtx(PSImode);
-		emit_insn(gen_ldm(tmp, ops[1]));
-		if(REG_P(ops[2])) {
-			tmp2 = gen_reg_rtx(PSImode);
-			emit_insn(gen_ldm(tmp2, ops[2]));
-			emit_insn(gen_add_accs(tmp, tmp2));
+	if(REG_P(ops[1])) {
+		ops[1] = convert_to_mode(PSImode, ops[1], 0);
+
+		if( MEM_P(ops[2]) || CONSTANT_P(ops[2]) ) {
+			emit_insn(gen_add(ops[1], ops[2]));
 		} else {
-			emit_insn(gen_add(tmp, ops[2]));
+			ops[2] = convert_to_mode(PSImode, ops[2], 0);
+			emit_insn(gen_add_accs(ops[1], ops[2]));
 		}
-		emit_insn(gen_stlm(ops[0], tmp));
+		ops[1] = convert_to_mode(QImode, ops[1], 0);
+		emit_move_insn(ops[0], ops[1]);
 		done = 1;
-	} else if( MEM_P(ops[1]) && MEM_P(ops[2]) && !no_new_pseudos ) {
-		tmp = gen_reg_rtx(PSImode);
-		emit_insn(gen_add_xmem(tmp, ops[1], ops[2]));
-		emit_insn(gen_sth(ops[0], tmp));
+	} else if( MEM_P(ops[1]) && CONSTANT_P(ops[2]) ) {
+		emit_insn(gen_addm(ops[1], ops[2]));
+		emit_move_insn(ops[0], ops[1]);
 		done = 1;
 	}
 
