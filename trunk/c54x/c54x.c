@@ -184,7 +184,7 @@ legitimate_address_p (enum machine_mode mode, rtx addr, int strict)
 int
 c54x_expand_movqi(rtx ops[])
 {
-	int done = 2;
+	int done = 0;
 	int i;
 	rtx tmp, tmp2;
 
