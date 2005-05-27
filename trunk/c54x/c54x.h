@@ -49,8 +49,8 @@ extern int target_flags;
 
 /* Node: Storage Layout */
 #define BITS_BIG_ENDIAN         1
-#define BYTES_BIG_ENDIAN        1
-#define WORDS_BIG_ENDIAN        1
+#define BYTES_BIG_ENDIAN        0
+#define WORDS_BIG_ENDIAN        0
 #define FLOAT_WORDS_BIG_ENDIAN  1
 #define BITS_PER_UNIT           16
 #define UNITS_PER_WORD          1
