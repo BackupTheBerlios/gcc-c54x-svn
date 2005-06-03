@@ -181,10 +181,9 @@ legitimate_address_p (enum machine_mode mode, rtx addr, int strict)
 	return valid;
 }
 
-int
+void
 c54x_expand_movqi(rtx ops[])
 {
-	int done = 0;
 	int i;
 	rtx tmp, tmp2;
 
@@ -197,25 +196,22 @@ c54x_expand_movqi(rtx ops[])
 	if( (ARSP_REG_P(ops[0])||PSEUDO_REG_P(ops[0]))
 		&& (ARSP_REG_P(ops[1])||PSEUDO_REG_P(ops[1])) ) {
 		emit_insn(gen_mvmm(ops[0], ops[1]));
-		done = 1;
 	} else if( ACC_REG_P(ops[0]) && REG_P(ops[1]) && !no_new_pseudos ) {
 		tmp = gen_reg_rtx(ACCmode);
 		emit_insn(gen_ldm(tmp, ops[1]));
 		emit_insn(gen_stlm(ops[0], tmp));
-		done = 1;
 	} else if( ACC_REG_P(ops[0]) && MEM_P(ops[1]) && !no_new_pseudos) {
 		tmp = gen_reg_rtx(ACCmode);
 		emit_insn(gen_ldu(tmp, ops[1]));
 		emit_insn(gen_stl(ops[0], tmp));
-		done = 1;
 	} else if( REG_P(ops[0]) && ACC_REG_P(ops[1]) && !no_new_pseudos) {
 		tmp = gen_reg_rtx(ACCmode);
 		emit_insn(gen_ldm(tmp, ops[1]));
 		emit_insn(gen_stlm(ops[0], tmp));
-		done = 1;
+	} else {
+		/* If we end up here, we did not expand the pattern */
+		gcc_assert(0);
 	}
-
-	return done;
 }
 
 void
