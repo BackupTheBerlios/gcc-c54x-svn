@@ -218,10 +218,9 @@ c54x_expand_movqi(rtx ops[])
 	return done;
 }
 
-int
+void
 c54x_expand_addqi(rtx ops[])
 {
-	int done = 0;
 	int i;
 	rtx tmp, tmp2;
 
@@ -233,8 +232,7 @@ c54x_expand_addqi(rtx ops[])
 
 	if(SP_REG_P(ops[0]) && SP_REG_P(ops[1]) && CONSTANT_P(ops[2])) {
 		emit_insn(gen_frame(ops[0], ops[2]));
-		done = 1;
-	}else if(REG_P(ops[1])) {
+	} else if(REG_P(ops[1])) {
 		ops[1] = convert_to_mode(ACCmode, ops[1], 0);
 
 		if( MEM_P(ops[2]) || CONSTANT_P(ops[2]) ) {
@@ -245,14 +243,19 @@ c54x_expand_addqi(rtx ops[])
 		}
 		ops[1] = convert_to_mode(QImode, ops[1], 0);
 		emit_move_insn(ops[0], ops[1]);
-		done = 1;
 	} else if( MEM_P(ops[1]) && CONSTANT_P(ops[2]) ) {
 		emit_insn(gen_addm(ops[1], ops[2]));
 		emit_move_insn(ops[0], ops[1]);
-		done = 1;
+	} else if( MEM_P(ops[1]) && MEM_P(ops[2]) ) {
+		ops[1] = convert_to_mode(ACCmode, ops[1], 0);
+		ops[1] = force_reg(ACCmode, ops[1]);
+		emit_insn(gen_add(ops[1], ops[2]));
+		ops[1] = convert_to_mode(QImode, ops[1], 0);
+		emit_move_insn(ops[0], ops[1]);
+	} else {
+		/* If we end up here, we did not expand the pattern */
+		gcc_assert(0);
 	}
-
-	return done;
 }
 
 void
