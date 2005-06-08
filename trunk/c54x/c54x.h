@@ -184,6 +184,7 @@ extern int target_flags;
 #define PSEUDO_REG_P(X) (REG_P(X) && PSEUDO_REGNO_P(REGNO(X)))
 #define XMEM_REG_P(X)   (REG_P(X) && XMEM_REGNO_P(REGNO(X)))
 #define MMR_REG_P(X)    (REG_P(X) && MMR_REGNO_P(REGNO(X)))
+#define REGISTER_P(X)   (REG_P(X) || GET_CODE(X) == SUBREG)
 
 /* Node: Register Basics */
 

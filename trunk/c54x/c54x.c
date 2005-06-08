@@ -181,37 +181,49 @@ legitimate_address_p (enum machine_mode mode, rtx addr, int strict)
 	return valid;
 }
 
-void
+int
 c54x_expand_movqi(rtx ops[])
 {
+	const enum machine_mode mode = QImode;
 	int i;
-	rtx tmp, tmp2;
+	rtx tmp1, tmp2;
 
 	fprintf(stderr, "-%s--movqi:", no_new_pseudos?"noP":"P");
 	for(i=0; i < 2; i++) {
 		print_rtl(stderr, ops[i]);
 	}
 	fprintf(stderr, "--\n");
-
-	if( (ARSP_REG_P(ops[0])||PSEUDO_REG_P(ops[0]))
-		&& (ARSP_REG_P(ops[1])||PSEUDO_REG_P(ops[1])) ) {
-		emit_insn(gen_mvmm(ops[0], ops[1]));
-	} else if( ACC_REG_P(ops[0]) && REG_P(ops[1]) && !no_new_pseudos ) {
-		tmp = gen_reg_rtx(ACCmode);
-		emit_insn(gen_ldm(tmp, ops[1]));
-		emit_insn(gen_stlm(ops[0], tmp));
-	} else if( ACC_REG_P(ops[0]) && MEM_P(ops[1]) && !no_new_pseudos) {
-		tmp = gen_reg_rtx(ACCmode);
-		emit_insn(gen_ldu(tmp, ops[1]));
-		emit_insn(gen_stl(ops[0], tmp));
-	} else if( REG_P(ops[0]) && ACC_REG_P(ops[1]) && !no_new_pseudos) {
-		tmp = gen_reg_rtx(ACCmode);
-		emit_insn(gen_ldm(tmp, ops[1]));
-		emit_insn(gen_stlm(ops[0], tmp));
-	} else {
-		/* If we end up here, we did not expand the pattern */
-		gcc_assert(0);
+	
+	/* Push */
+	if(memory_operand(ops[0], mode) && GET_CODE(XEXP(ops[0], 0)) == PRE_DEC) {
+		emit_insn(gen_pushqi(ops[1]));
+		fprintf(stderr, "generated \"push\"\n");
+		return 1;
 	}
+
+	if( (GET_CODE(ops[0]) == SUBREG && GET_MODE(XEXP(ops[0], 0)) == ACCmode)
+		&& (GET_CODE(ops[1]) == SUBREG && GET_MODE(XEXP(ops[1], 0)) == ACCmode)) {
+		fprintf(stderr, "ZOINK!\n");
+		tmp1 = gen_reg_rtx(QImode);
+		emit_move_insn(tmp1, ops[1]);
+		emit_move_insn(ops[0], tmp1);
+		return 1;
+	}
+
+	/* ld */
+/* 	if(GET_CODE(ops[0]) == SUBREG && GET_MODE(XEXP(ops[0], 0)) == ACCmode) { */
+/* 		ops[0] = convert_to_mode(ACCmode, ops[0], 0); */
+
+/* 		if(immediate_operand(ops[1], mode)) { */
+/* 			emit_insn(gen_ld_const(ops[0], ops[1])); */
+/* 		} else { */
+/* 			emit_insn(gen_ldu(ops[0], ops[1])); */
+/* 		} */
+/* 		fprintf(stderr, "generated \"ld\"\n"); */
+/* 		return 1; */
+/* 	} */
+
+	return 0;
 }
 
 void
@@ -236,6 +248,7 @@ c54x_expand_addqi(rtx ops[])
 		} else {
 			ops[2] = convert_to_mode(ACCmode, ops[2], 0);
 			emit_insn(gen_add_accs(ops[1], ops[2]));
+			fprintf(stderr, "generated \"add_accs\"\n");
 		}
 		ops[1] = convert_to_mode(QImode, ops[1], 0);
 		emit_move_insn(ops[0], ops[1]);
@@ -248,6 +261,7 @@ c54x_expand_addqi(rtx ops[])
 		emit_insn(gen_add(ops[1], ops[2]));
 		ops[1] = convert_to_mode(QImode, ops[1], 0);
 		emit_move_insn(ops[0], ops[1]);
+		fprintf(stderr, "generated \"add\"\n");
 	} else {
 		/* If we end up here, we did not expand the pattern */
 		gcc_assert(0);
@@ -455,20 +469,25 @@ void
 c54x_expand_prologue()
 {
 	int r;
+	rtx insn;
 
 	for(r = 0; r < FIRST_PSEUDO_REGISTER; r++) {
 		if(c54x_save_register_p(r)) {
-			emit_insn(gen_pushqi(gen_rtx_REG(QImode, r)));
+			insn = emit_insn(gen_pushqi(gen_rtx_REG(QImode, r)));
+			RTX_FRAME_RELATED_P(insn) = 1;
 		}
 	}
 
-	if(get_frame_size() > 0)
-		emit_insn(gen_frame(gen_rtx_REG (QImode, STACK_POINTER_REGNUM),
+	if(get_frame_size() > 0) {
+		insn = emit_insn(gen_frame(gen_rtx_REG (QImode, STACK_POINTER_REGNUM),
 							gen_rtx_CONST_INT(VOIDmode, get_frame_size())));
+		RTX_FRAME_RELATED_P(insn) = 1;
+	}
 
 	if(frame_pointer_needed) {
-		emit_move_insn(gen_rtx_REG (QImode,	FRAME_POINTER_REGNUM),
+		insn = emit_move_insn(gen_rtx_REG (QImode,	FRAME_POINTER_REGNUM),
 					   gen_rtx_REG (QImode, STACK_POINTER_REGNUM));
+		RTX_FRAME_RELATED_P(insn) = 1;
 	}
 }
 
@@ -476,18 +495,23 @@ void
 c54x_expand_epilogue()
 {
 	int r;
+	rtx insn;
 
-	if(get_frame_size() > 0)
-		emit_insn(gen_frame(gen_rtx_REG (QImode, STACK_POINTER_REGNUM),
+	if(get_frame_size() > 0) {
+		insn = emit_insn(gen_frame(gen_rtx_REG (QImode, STACK_POINTER_REGNUM),
 							gen_rtx_CONST_INT(VOIDmode, -get_frame_size())));
+		RTX_FRAME_RELATED_P(insn) = 1;
+	}
 
 	for(r = FIRST_PSEUDO_REGISTER - 1; r > 0; r--) {
 		if(c54x_save_register_p(r)) {
-			emit_insn(gen_popqi(gen_rtx_REG(QImode, r)));
+			insn = emit_insn(gen_popqi(gen_rtx_REG(QImode, r)));
+			RTX_FRAME_RELATED_P(insn) = 1;
 		}
 	}
 
-	emit_insn(gen_return());
+	insn = emit_insn(gen_return());
+	RTX_FRAME_RELATED_P(insn) = 1;
 }
 
 int
