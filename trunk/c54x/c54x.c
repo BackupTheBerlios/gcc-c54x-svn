@@ -238,8 +238,9 @@ c54x_expand_addqi(rtx ops[])
 	}
 	fprintf(stderr, "--\n");
 
-	if(SP_REG_P(ops[0]) && SP_REG_P(ops[1]) && CONSTANT_P(ops[2])) {
-		emit_insn(gen_frame(ops[0], ops[2]));
+	if( SP_REG_P(ops[1]) && CONSTANT_P(ops[2])) {
+		emit_insn(gen_frame(ops[1], ops[2]));
+		emit_move_insn(ops[0], ops[1]);
 		fprintf(stderr, "generated \"frame\"\n");
 		return 1;
 	} else if( (REG_P(ops[1]) || MEM_P(ops[1])) && immediate_operand(ops[2], VOIDmode) ) {
