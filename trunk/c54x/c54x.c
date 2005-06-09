@@ -238,41 +238,22 @@ c54x_expand_addqi(rtx ops[])
 	}
 	fprintf(stderr, "--\n");
 
-	if( SP_REG_P(ops[1]) && CONSTANT_P(ops[2])) {
+	if(SP_REG_P(ops[0]) && immediate_operand(ops[2], VOIDmode)) {
 		emit_insn(gen_frame(ops[1], ops[2]));
 		emit_move_insn(ops[0], ops[1]);
-		fprintf(stderr, "generated \"frame\"\n");
 		return 1;
-	} else if( (REG_P(ops[1]) || MEM_P(ops[1])) && immediate_operand(ops[2], VOIDmode) ) {
-		fprintf(stderr, "ZOINK!\n");
+	} else if(memory_operand(ops[1], QImode) && immediate_operand(ops[2], VOIDmode)) {
 		emit_insn(gen_addm(ops[1], ops[2]));
 		emit_move_insn(ops[0], ops[1]);
 		return 1;
-	} else if(REG_P(ops[1])) {
-		ops[1] = convert_to_mode(ACCmode, ops[1], 0);
-
-		if( MEM_P(ops[2]) || CONSTANT_P(ops[2]) ) {
-			emit_insn(gen_add(ops[1], ops[2]));
-		} else {
-			ops[2] = convert_to_mode(ACCmode, ops[2], 0);
-			emit_insn(gen_add_accs(ops[1], ops[2]));
-			fprintf(stderr, "generated \"add_accs\"\n");
-		}
-		ops[1] = convert_to_mode(QImode, ops[1], 0);
-		emit_move_insn(ops[0], ops[1]);
-		return 1;
-	} else if( MEM_P(ops[1]) && MEM_P(ops[2]) ) {
-		ops[1] = convert_to_mode(ACCmode, ops[1], 0);
-		ops[1] = force_reg(ACCmode, ops[1]);
+	} else if(register_operand(ops[1], QImode) && general_operand(ops[2], QImode)) {
+		ops[1] = convert_to_mode( ACCmode, ops[1], 0);
 		emit_insn(gen_add(ops[1], ops[2]));
-		ops[1] = convert_to_mode(QImode, ops[1], 0);
+		ops[1] = gen_rtx_SUBREG(QImode, ops[1], 0);
 		emit_move_insn(ops[0], ops[1]);
-		fprintf(stderr, "generated \"add\"\n");
 		return 1;
-	} else {
-		/* If we end up here, we did not expand the pattern */
-		return 0;
 	}
+	return 0;
 }
 
 void
