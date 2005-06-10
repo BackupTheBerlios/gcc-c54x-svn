@@ -238,19 +238,24 @@ c54x_expand_addqi(rtx ops[])
 	}
 	fprintf(stderr, "--\n");
 
-	if(SP_REG_P(ops[0]) && immediate_operand(ops[2], VOIDmode)) {
+	if( (SP_REG_P(ops[0]) && !PSEUDO_REG_P(ops[0])) && immediate_operand(ops[2], VOIDmode)) {
 		emit_insn(gen_frame(ops[1], ops[2]));
 		emit_move_insn(ops[0], ops[1]);
 		return 1;
-	} else if(memory_operand(ops[1], QImode) && immediate_operand(ops[2], VOIDmode)) {
+	} else if( (register_operand(ops[1], QImode) || memory_operand(ops[1], QImode))
+			   && immediate_operand(ops[2], VOIDmode)) {
 		emit_insn(gen_addm(ops[1], ops[2]));
 		emit_move_insn(ops[0], ops[1]);
 		return 1;
-	} else if(register_operand(ops[1], QImode) && general_operand(ops[2], QImode)) {
-		ops[1] = convert_to_mode( ACCmode, ops[1], 0);
-		emit_insn(gen_add(ops[1], ops[2]));
-		ops[1] = gen_rtx_SUBREG(QImode, ops[1], 0);
-		emit_move_insn(ops[0], ops[1]);
+	} else if(register_operand(ops[1], QImode) && general_operand(ops[2], QImode) && !no_new_pseudos) {
+		ops[1] = convert_to_mode(ACCmode, ops[1], 0);
+		tmp = gen_rtx_SUBREG(QImode, ops[1], 0);
+		if(immediate_operand(ops[2], VOIDmode)) {
+			emit_insn(gen_add_const(ops[1], ops[2]));
+		} else {
+			emit_insn(gen_add(ops[1], ops[2]));
+		}
+		emit_move_insn(ops[0], tmp);
 		return 1;
 	}
 	return 0;
