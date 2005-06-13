@@ -39,4 +39,3 @@ extern void c54x_expand_epilogue(void);
 extern int  c54x_save_register_p(int);
 extern void c54x_file_start(void);
 extern int  c54x_initial_elimination_offset(int, int);
-extern rtx  c54x_change_rtx_mode(rtx, enum machine_mode);

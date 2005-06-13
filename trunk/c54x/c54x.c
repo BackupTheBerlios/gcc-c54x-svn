@@ -555,14 +555,3 @@ c54x_initial_elimination_offset(int from, int to)
 
 	return offset;
 }
-
-rtx
-c54x_change_rtx_mode(rtx x, enum machine_mode mode)
-{
-	rtx ret;
-
-	ret = copy_rtx(x);
-	PUT_MODE(ret, mode);
-
-	return ret;
-}
