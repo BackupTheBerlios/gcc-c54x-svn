@@ -1,0 +1,100 @@
+% Report for ECS 199, Spring 05
+% Bryan Richter
+% File created 15 June 2005
+
+\documentclass{article}
+\usepackage[margin=1in]{geometry}
+\author{Bryan Richter\\ECS 199, Spring Quarter '05\\UC Davis}
+\title{Porting GCC, Part II}
+
+%use \file{blah} to list a file named blah.
+\newcommand{\file}[1]{{\tt#1}}
+
+\begin{document}
+
+\maketitle
+
+This report is a follow-up to an earlier report that documents the work
+undertaken by the author to port GCC to a new target. For information regarding
+rationale, GCC, and the target architecture TMS320C54\emph{x}, see the previous
+report.
+
+This report will be significantly slimmer than the previous, in part because I
+will not repeat the background information, but also in part because I was no
+longer the significant contributor to the project's code. As I will discuss,
+this port became an international collaboration in the spirit of Open Source
+Software.
+
+\section{Work Done}
+
+After spending three months on my own, reading documentation and writing macros
+in the header file, I realized it was time to rejoin the GCC community. I began
+by contacting the organizers of previous port efforts and asking their
+permission to go ahead with my own (rather than add my contributions to their
+projects). I did this for a three reasons: they other projects showed no
+activity, I wanted to use the Subversion system rather than CVS, and I figured I
+would have more free time than some of the other projects leaders, which would
+make me a better candidate for project maintenance.
+
+After receiving the go-ahead, my next step was to create a project site. I chose
+BerliOS\footnote{\tt http://www.berlios.de} as a host site, and created a rough
+website for the project\footnote{\tt http://gcc-c54x.berlios.de}. Also, I
+immediately was contacted by some interested developers. I had barely made my
+presence known before beginning to collaborate with people from around the globe.
+
+One person in particular, Jonathan Bastien-Filiatrault of Canada, had
+independently done much of the same work I had. We consolidated our code
+(choosing my own where they overlapped, since we determined mine to be more
+organized), and Jonathan immediately began to add code at a phenomenal rate. At
+this point, I relegated myself to the role of `interested onlooker,' as
+Jonathan's coding speed and free time surpassed my own.
+
+\section{Results}
+
+My personal accomplishment this quarter was to kick off an Open Source Project
+with global contributors. The overall project's accomplishments, due mostly to
+Mr. Bastien-Filiatrault's efforts, have been quite satisfactory. For one, we can
+now compile GCC. This allows us to check our work by seeing how it affects test
+compilations, which is enormously useful. I had to do all my work blind last
+quarter, as I could get no feedback on my macros. Further, important aspects of
+the compiler actually \emph{work}, and it outputs correct(?) assembly for
+argument-passing and simple arithmetic instructions. There is also a much larger
+framework in place to add on more and more instructions.
+
+\section{Future Work}
+
+There is, of course, much yet to be done. Jonathan has expressed the feeling
+that his limits of GCC understanding have been reached, and his incredibly fast
+code production has slowed. This means that there is plenty of work left to do
+in the port itself, from optimizing macros, to adding more instructions and zany
+RTXs, to cleaning up the files and preserving order. Outside of the port, more
+work could be put into making the webpage more attractive and informational.
+Another potential project, which would benefit a large number of people, would
+be a test-harness that could be used to verify the correctness of macros or sets
+of macros. I am unaware of any existing test platform, and I am not clear on its
+feasibility, but I can see its benefit. 
+
+More in line with this particular project's goals and motivation, other future
+work could include merging the work into GCC. While this is not a difficult task
+in itself, the port must be taken to a respectable state of working order before
+its inclusion is merited. Other possibilities would be to obtain or create a
+library that would allow GCC to compile just not for the TMS320C54\emph{x}, but
+for the Neuros in particular. Along this vein, creating the necessary additions
+to the port such that it truly deserves the \emph{x} on TMS320C54\emph{x}
+(instead of working solely for the 'C5416) would be a good project. Finally,
+figuring out and documenting the steps necessary to build up to compiling the
+Neuros' firmware would be a welcome addition to the OSS community.
+
+\begin{thebibliography}{99}
+\bibitem{gccint} \emph{GCC Internals Manual}.
+\texttt{http://gcc.gnu.org/onlinedocs/gccint/}, Mar. 20 2005. Free Software
+Foundation, Inc.
+
+\bibitem{refset1} \emph{TMS320C54x DSP Reference Set, Volume 1}. Texas
+Instruments, Inc. Fort Worth, Texas, 2001.
+
+\bibitem{refset2} \emph{TMS320C54x DSP Reference Set, Volume 2}. Texas
+Instruments, Inc. Fort Worth, Texas, 2001.
+
+\end{thebibliography}
+\end{document}

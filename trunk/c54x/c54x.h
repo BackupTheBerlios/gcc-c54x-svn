@@ -414,13 +414,13 @@ enum reg_class
     (bottom <= val && val <= top)
 
 #define CONST_OK_FOR_LETTER_P(value, c)                \
-    ( ((c) == 'I') ? IN_RANGE_P (value, -32768, 65535) \
-    : ((c) == 'J') ? IN_RANGE_P (value, 0, 7)          \
-    : ((c) == 'K') ? IN_RANGE_P (value, 0, 15)         \
-    : ((c) == 'L') ? IN_RANGE_P (value, -16, 15)       \
-    : ((c) == 'M') ? IN_RANGE_P (value, 0, 511)        \
-    : ((c) == 'O') ? IN_RANGE_P (value, 0, 255)        \
-	: ((c) == 'P') ? IN_RANGE_P (value, -128, 127)     \
+    ( ((c) == 'I') ? IN_RANGE_P(value, -32768, 65535) \
+    : ((c) == 'J') ? IN_RANGE_P(value, 0, 7)          \
+    : ((c) == 'K') ? IN_RANGE_P(value, 0, 15)         \
+    : ((c) == 'L') ? IN_RANGE_P(value, -16, 15)       \
+    : ((c) == 'M') ? IN_RANGE_P(value, 0, 511)        \
+    : ((c) == 'O') ? IN_RANGE_P(value, 0, 255)        \
+	: ((c) == 'P') ? IN_RANGE_P(value, -128, 127)     \
     : 0 )
 
 extern const enum reg_class regclass_map[FIRST_PSEUDO_REGISTER];
