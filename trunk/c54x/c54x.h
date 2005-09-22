@@ -27,7 +27,7 @@
  * obvious reasons.
  * Edit: Gah, too bad they are both buggy and under-maintained. */
 
-/* Node: Driver */
+/* Node: Driver (empty) */
 /* Node: Run-time Target Specification */
 
 #define TARGET_CPU_CPP_BUILTINS()       \
@@ -45,7 +45,7 @@ extern int target_flags;
 
 #define OVERRIDE_OPTIONS c54x_override_options()
 
-/* Node: Per-Function Data */
+/* Node: Per-Function Data (empty) */
 
 /* Node: Storage Layout */
 #define BITS_BIG_ENDIAN         1
@@ -55,7 +55,8 @@ extern int target_flags;
 #define BITS_PER_UNIT           16
 #define UNITS_PER_WORD          1
 
-/* Promotion stuff, which doesn't matter. No mode is narrower than 16. */
+/* (not present) Promotion stuff, which doesn't matter. No mode is narrower
+ * than 16. */
 
 #define PARM_BOUNDARY            BITS_PER_WORD
 #define STACK_BOUNDARY           BITS_PER_WORD
@@ -64,11 +65,10 @@ extern int target_flags;
 #define MINIMUM_ATOMIC_ALIGNMENT BITS_PER_WORD
 #define EMPTY_FIELD_BOUNDARY     BITS_PER_WORD
 #define STRICT_ALIGNMENT         1  /* Nothing is smaller than alignment.. */
-#define MAX_FIXED_MODE_SIZE      40 /* HImode, same as c4x */
+#define MAX_FIXED_MODE_SIZE      40 /* FIXME: HImode, same as c4x? */
 /* VECTOR_MODE_SUPPORTED? */
 
 /* Node: Type Layout */
-
 #define SHORT_TYPE_SIZE     BITS_PER_WORD
 #define LONG_TYPE_SIZE      (2*BITS_PER_WORD)
 #define LONG_LONG_TYPE_SIZE (2*BITS_PER_WORD)
@@ -77,37 +77,28 @@ extern int target_flags;
 #define SIZE_TYPE "unsigned int" /* default is too big for these */
 #define PTRDIFF_TYPE "int"
 
-/* hmmm.. we have 16 bits and 40 bits... what to do? How many of our
-   functions are actually 32 bit? */
 #define DEFAULT_SIGNED_CHAR     0  /* FIXME (ripped from c4x) */
 
 
-/* Node: (not a node) */
-
-/* Define register numbers */
+/* Node: (not a node) * Define register numbers */
 
 /* Interrupt mask and flag regs */
-
 #define IMR_REGNO   0
 #define IFR_REGNO   1
 
 /* Status regs 0 and 1 */
-
 #define ST0_REGNO   2
 #define ST1_REGNO   3
 
 /* Accumulators A and B */
-
 #define A_REGNO     4
 #define B_REGNO     5
 
 /* Tmp and transition regs */
-
 #define T_REGNO     6
 #define TRN_REGNO   7
 
 /* Auxiliary regs */
-
 #define AR0_REGNO   8
 #define AR1_REGNO   9
 #define AR2_REGNO  10
@@ -118,25 +109,20 @@ extern int target_flags;
 #define AR7_REGNO  15
 
 /* Stack pointer */
-
 #define SP_REGNO   16
 
 /* Circular buffer size reg */
-
 #define BK_REGNO   17
 
 /* Block-repeat counter, start addr, and end addr regs */
-
 #define BRC_REGNO  18
 #define RSA_REGNO  19
 #define REA_REGNO  20
 
 /* Proc mode status reg */
-
 #define PMST_REGNO 21
 
 /* PC extension reg */
-
 #define XPC_REGNO  22
 
 /* Data Page register */
@@ -147,6 +133,12 @@ extern int target_flags;
 
 /* PC reg? */
 
+/* register tests:
+ * Here are some register tests (will test if a register number matches a
+ * particular type of register)
+ */
+
+/* helper function */
 #define IN_REG_RANGE_P(REGNO, MIN, MAX) \
     ((unsigned int)(REGNO) - (MIN) <= (MAX) - (MIN))
 
@@ -186,12 +178,15 @@ extern int target_flags;
 #define MMR_REG_P(X)    (REG_P(X) && MMR_REGNO_P(REGNO(X)))
 #define REGISTER_P(X)   (REG_P(X) || GET_CODE(X) == SUBREG)
 
+/* Node: Escape Sequences : empty */
+
 /* Node: Register Basics */
 
 /* number of registers */
 #define FIRST_PSEUDO_REGISTER 25
 
-/* registers that have a fixed purpose and can't be used for general tasks. */
+/* registers that have a fixed purpose 
+ * and can't be used for general tasks. */
 #define FIXED_REGISTERS \
 { \
   /* IMR IFR ST0 ST1 A   B   T   TRN AR0 AR1 AR2 */ \
@@ -200,7 +195,6 @@ extern int target_flags;
      0,  0,  0,  0,  0,  1,  0,  0,  0,  0,  1,   1,  1, 1  \
 }
 
-/* FIXED */
 #define CALL_USED_REGISTERS \
 { \
   /* IMR IFR ST0 ST1 A   B   T   TRN AR0 AR1 AR2 */ \
@@ -236,6 +230,7 @@ extern int target_flags;
 /* Node: Stack Registers : not to be used */
 
 /* Node: Register Classes */
+/* TODO: get rid of single-register classes? */
 enum reg_class
 {
     NO_REGS,
@@ -330,7 +325,16 @@ enum reg_class
     {0xffffffff}  /* ALL_REGS */ \
 }
 
-/* Register constraint letters
+extern const enum reg_class regclass_map[FIRST_PSEUDO_REGISTER];
+
+#define REGNO_REG_CLASS(REGNO) (regclass_map[REGNO])
+
+#define BASE_REG_CLASS ARSP_REGS
+
+/* FIXME: double check this */
+#define INDEX_REG_CLASS NO_REGS
+
+/* Register constraint letters.
  *
  * a - Accum. A
  * b - Accum. B
@@ -356,21 +360,6 @@ enum reg_class
  * y - DBL_OP_REGS
  * z - MMR_REGS
  *
- * Integer range constraints
- *
- * I - 16 bit int
- * J - 3 bit unsigned int
- * K - 4 bit unsigned int
- * L - 5 bit int
- * M - 9 bit int
- * O - 8 bit unsigned int
- *
- * Memory constraints
- *
- * Y - Xmem memory operand
- * S - Smem memory operand
- * T - Smem memory operand (write only)
- * U - dmad memory operand
  */
 
 #define REG_CLASS_FROM_LETTER(c)  \
@@ -395,11 +384,25 @@ enum reg_class
     : ((c) == 'z') ? MMR_REGS      \
     : NO_REGS )
 
+/* FIXME: from the doc, "...or a pseudo register that has been allocated
+ * such a hard register." Surely that doesn't apply to ALL pseudo
+ * registers...
+ */
+#define REGNO_OK_FOR_BASE_P(REGNO) \
+    (ARSP_REGNO_P(REGNO) || PSEUDO_REGNO_P(REGNO))
+
+/* FIXME: double check this */
+#define REGNO_OK_FOR_INDEX_P(REGNO) 0
+
 /* This will work, but might not be optimal */
 #define PREFERRED_RELOAD_CLASS(x, CLASS) CLASS
 
-/* A bunch of stuff about reloading that, as far as I know, I don't need. I very
- * well could be wrong, of course. */
+/* A bunch of stuff about reloading that, as far as I know, I don't need. I
+ * very well could be wrong, of course. */
+
+/* TODO: I think we need this, but let's try removing it at some point. */
+#define SMALL_REGISTER_CLASSES 1
+
 
 /* FIXME: This needs help */
 /* #define CLASS_MAX_NREGS(CLASS, MODE)   \ */
@@ -409,6 +412,23 @@ enum reg_class
 #define CLASS_MAX_NREGS(CLASS, MODE)   \
    ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD)
 
+
+/* Integer range constraints
+ *
+ * I - 16 bit int
+ * J - 3 bit unsigned int
+ * K - 4 bit unsigned int
+ * L - 5 bit int
+ * M - 9 bit int
+ * O - 8 bit unsigned int
+ *
+ * Memory constraints
+ *
+ * Y - Xmem memory operand
+ * S - Smem memory operand
+ * T - Smem memory operand (write only)
+ * U - dmad memory operand
+ */
 
 #define IN_RANGE_P(val, bottom, top) \
     (bottom <= val && val <= top)
@@ -423,34 +443,25 @@ enum reg_class
 	: ((c) == 'P') ? IN_RANGE_P(value, -128, 127)     \
     : 0 )
 
-extern const enum reg_class regclass_map[FIRST_PSEUDO_REGISTER];
-
-#define REGNO_REG_CLASS(REGNO) (regclass_map[REGNO])
-
-#define EXTRA_CONSTRAINT(VALUE, C) \
-    ( ((C) == 'Y') ? c54x_xmem_p((VALUE), (C)) \
-    : ((C) == 'S') ? c54x_smem_p((VALUE), (C)) \
-    : ((C) == 'T') ? c54x_smem_p((VALUE), (C)) \
-    : ((C) == 'U') ? c54x_dmad_p((VALUE), (C)) \
+#define EXTRA_CONSTRAINT(value, c) \
+    ( ((c) == 'Y') ? c54x_xmem_p((value), (c)) \
+    : ((c) == 'S') ? c54x_smem_p((value), (c)) \
+    : ((c) == 'T') ? c54x_smem_p((value), (c)) \
+    : ((c) == 'U') ? c54x_dmad_p((value), (c)) \
     : 0 )
 
-#define EXTRA_MEMORY_CONSTRAINT(C, STR) \
-    ( (C) == 'Y' || (C) == 'S' || (C == 'T') || (C == 'U') )
+/* FIXME: or are they ADDRESS constraints? I know it's a dumb question. */
+#define EXTRA_MEMORY_CONSTRAINT(c) \
+    ( (c) == 'Y' || (c) == 'S' || (c) == 'T' || (c) == 'U' )
 
-#define CONST_DOUBLE_OK_FOR_CONSTRAINT_P(VALUE, C, STR)  1
-
-#define BASE_REG_CLASS ARSP_REGS
-
-#define INDEX_REG_CLASS NO_REGS
-
-#define REGNO_OK_FOR_BASE_P(REGNO) (ARSP_REGNO_P(REGNO) || PSEUDO_REGNO_P(REGNO))
-
-#define REGNO_OK_FOR_INDEX_P(REGNO) 0
 
 /* Node: Frame Layout */
+/* Note to self (i.e. Bryan): I remember that Jonathan and I were
+ * discussing this, but I don't remember if we came to an agreement. I'll
+ * assume it's fine for now.
+ */
 /* http://focus.ti.com/lit/ug/spru103g/spru103g.pdf Explains a great deal about the ABI and frame layout */
 
-/* note to the humorless: the value of the preceding macro is unimportant */
 #define STACK_GROWS_DOWNWARD
 
 /* FRAME info is stuff I'll have to figure out from the TI compiler */
@@ -465,11 +476,12 @@ extern const enum reg_class regclass_map[FIRST_PSEUDO_REGISTER];
 #define FIRST_PARM_OFFSET(FUNCDECL) 0 /* Argument pointer points to the first(lower) argument */
 
 /* Node: Exception Handling */
-/* ??? */
+/* This is not a necessity for code generation. Low priority. */
 
 /* Node: Stack Checking */
 /* hmmm. It sounds like the defaults work on most systems. I wonder if we have a
- * special case... */
+ * special case... Regardless, this is also not a necessity, so it is
+ * low-pri. */
 
 /* Node: Frame Registers */
 
@@ -479,7 +491,7 @@ extern const enum reg_class regclass_map[FIRST_PSEUDO_REGISTER];
 
 #define ARG_POINTER_REGNUM   ARG_REGNO
 
-/* Node: 13.9.5 Eliminating Frame Pointer and Arg Pointer */
+/* Node: 10.10.5 Elimination */
 
 #define FRAME_POINTER_REQUIRED 0
 
@@ -494,8 +506,6 @@ extern const enum reg_class regclass_map[FIRST_PSEUDO_REGISTER];
 
 #define INITIAL_ELIMINATION_OFFSET(FROM, TO, OFFSET) \
 	((OFFSET) = c54x_initial_elimination_offset((FROM), (TO)))
-
-#define SMALL_REGISTER_CLASSES 1
 
 /* Node: 13.11 Trampolines for Nested Functions */
 
