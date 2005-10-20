@@ -1,0 +1,383 @@
+;; -*- Scheme -*-
+;;
+;;
+;; CGEN CPU specification for the TI C54x.
+;; Author : Ramana Radhakrishnan <ramana.radhakrishnan@codito.com>
+
+;; I should spare a moment to think about my earlier thoughts regarding
+;; using scheme in projects. Well think again. PUCSD thank you !
+;; (http://cs.unipune.ernet.in)
+
+
+;; This still has a long way to go . Its an effort to relearn cgen having
+;; forgotten everything I learnt 2 years back . Hopefully I should have
+;; some more documentation than this written up about how to go about
+;; such ports from now on. This was written in a caffeine induced fit of
+;; re-learning cgen . Guile rocks.
+
+;; Remember to do the following. This is from the cgen doco and a
+;; useful mechanism to validate the cpu description.
+
+;; 1. open ~/.cgenrc and fill it with the following ofcourse
+;; after removing the comments (; are the comments for the uninitiated.)
+;; (define (tic54x-opc)
+;;   (load-opc)
+;;   (cload #:arch "tic54x")
+;;   )
+;; (define (tic54x-sim)
+;;   (load-sim)
+;;   (cload #:arch "tic54x" #:options "with-scache with-profile=fn")
+;;   )
+;;   SRC_DIR = /home/ramana/work/fsf/fsfextsrc/src/cgen
+;; 2. (From the Guile doco.) set GUILE_LOAD_PATH to $SRC_DIR
+;;    Change this to the correct path that you need.
+;; 3. cd $SRC_DIR
+;; 4. guile -l dev.scm
+;; 5. (tic54x-sim) to validate the simulator syntax and reduce your
+;;    development time. :-)
+
+
+
+;; The approach that I followed was the following.
+
+;; Take the instruction set , divide it up depending on classes in the ISA manual maybe?
+;; Then attempt to group instructions into patterns based on encoding + operands .
+;; A spreadsheet to group these is rather useful and referrable.
+;; (Ah! if only I could convert the spreadsheet into its equivalent CGEN encoding
+;; but then we introduce one more language to describe that. :-))
+
+;; What I am not sure of yet is how to model the memory mapped registers
+;; which seem to be quite a few in this architecture . They are accessible
+;; from page 0 too.
+
+(include "simplify.inc")
+
+(define-arch
+ (name tic54x)
+ (comment "Texas Instruments DSP C54x ")
+ (default-alignment forced)
+ (insn-lsb0? #t)
+ (machs c541 c542 c543 c544 c545 c546 c547 c548 c549 c5402 c5410 c5420)
+ (isas tic54x)
+)
+
+(define-isa
+ (name tic54x)
+ (base-insn-bitsize 16)
+; Lets not give any decode assist yet.
+;  (decode-assist 15 14 13 12)
+ (liw-insns 1)
+ (parallel-insns 1)
+
+; This needs to change later once we know
+; the number of parallel instructions that
+; can execute. This changes for class 7 where
+; we can have a load from Xmem into an accumulator (A/B)
+; and a macr with Ymem into another accumulator (B/A)
+
+)
+
+; CPU families are an internal and artificial classification designed to
+; collect processor variants that are sufficiently similar together under
+; one roof for the simulator.  What is ``sufficiently similar'' is up to
+; the programmer.  For example, if the only difference between two
+; processor variants is that one has a few extra instructions, there's no
+; point in treating them separately in the simulator.
+
+
+
+(define-cpu
+ ; cpu names must be distinct from the architecture name and machine names.
+ ; The "b" suffix stands for "base" and is the convention.
+ ; The "f" suffix stands for "family" and is the convention.
+ (name c54xbf)
+ (comment "c54x base family")
+ (endian little)
+ (word-bitsize 16)
+)
+
+
+; CGEN uses ``mach'' in the same sense that BFD uses ``mach''.
+; ``Mach'', which is short for `machine', defines a variant of
+; the architecture.
+; So here we define all the CPU Variants
+
+(define-mach
+ (name c541)
+ (comment "C541")
+ (cpu c54xbf)
+)
+
+(define-mach
+ (name c542)
+ (comment "C542")
+ (cpu c54xbf)
+)
+(define-mach
+ (name c543)
+ (comment "C543")
+ (cpu c54xbf)
+)
+(define-mach
+ (name c544)
+ (comment "C544")
+ (cpu c54xbf)
+)
+(define-mach
+ (name c545)
+ (comment "C545")
+ (cpu c54xbf)
+)
+(define-mach
+ (name c546)
+ (comment "C546")
+ (cpu c54xbf)
+)
+(define-mach
+ (name c547)
+ (comment "C547")
+ (cpu c54xbf)
+)
+(define-mach
+ (name c548)
+ (comment "C548")
+ (cpu c54xbf)
+)
+(define-mach
+ (name c549)
+ (comment "C549")
+ (cpu c54xbf)
+)
+(define-mach
+ (name c5402)
+ (comment "C5402")
+ (cpu c54xbf)
+)
+(define-mach
+ (name c5410)
+ (comment "C5410")
+ (cpu c54xbf)
+)
+(define-mach
+ (name c5420)
+ (comment "C5420")
+ (cpu c54xbf)
+)
+
+
+; When describing a CPU, in any context, there is ``architecture'' and
+; there is ``implementation''.  In CGEN parlance a ``model'' is an
+; implementation of a ``mach''.  Models specify pipeline and other
+; performance related characteristics of the implementation.
+
+; Some architectures bring pipeline details up into the architecture
+; (rather than making them an implementation detail).  It's not clear
+; yet how to handle all the various possibilities so at present this is
+; done on a case-by-case basis.  Maybe a straightforward solution will
+; emerge.
+
+
+; I still need to define the pipeline here. Look out for the
+; pipeline description from the m32r port or the frv port in ../cpu
+
+
+(define-model
+ (name c54x_model) (comment "Model the c54x pipeline") (attrs)
+ (mach c541)
+ (pipeline all "" () ((prefetch) (fetch) (decode) (execute) (writeback)))
+ (unit u-exec "Execution Unit" () 1 1
+       () () () ())
+)
+
+
+; Hardware.
+
+
+;  (define-hardware
+;        (name hardware-name)
+;        (comment "description")
+;        (attrs attribute-list)
+;        (semantic-name hardware-semantic-name)
+;        (type type-name type-arg1 type-arg2 ...)
+;        (indices index-type index-arg1 index-arg2 ...)
+;        (values values-type values-arg1 values-arg2 ...)
+;        (handlers handler1 handler2 ...)
+;        (get (args) (expression))
+;        (set (args) (expression))
+;      )
+
+
+; The accumulators are 40 bit and are different .I think
+; we ought to model them as 2 separate accumulators . Currently
+; modelling them as 2 accumulators .
+
+(define-hardware
+ (name h-accuma)
+ (comment "accumulator A")
+ (type register DI)
+ (indices keyword "" ((a 0)))
+ (get () (c-call DI "@cpu@_h_accuma_get_handler"))
+ (set (newval) (c-call VOID "@cpu@_h_accuma_set_handler" newval))
+)
+
+
+(define-hardware
+ (name h-accumb)
+ (comment "accumulator B")
+ (type register DI )
+ (indices keyword "" ((b 0)))
+ (get () (c-call DI "@cpu@_h_accumb_get_handler"))
+ (set (newval) (c-call VOID "@cpu@_h_accumb_set_handler" newval))
+)
+;; We need to worry about the MMRS and modelling them right with
+;; all the addressing modes that can be followed.
+
+(define-hardware
+ (name h-accums)
+ (comment "Accumulators")
+ (type register DI (2))
+ (indices keyword "" ((a 0) (b 1)))
+ ; get/set so a accesses are redirected to h-accum.
+ ; They're also so reads can properly sign extend the value.
+ ; FIXME: Needn't be a function call.
+ (get (index) (c-call DI "@cpu@_h_accums_get_handler" index))
+ (set (index newval) (c-call VOID "@cpu@_h_accums_set_handler" index newval))
+)
+
+
+; Figure out how to model the status register.
+(define-hardware
+ (name h-st0)
+ (comment "status register0")
+ (type register HI)
+ (indices keyword "" ((st0 0)))
+ (get () (const 0))
+ (set (newval) (nop))
+)
+
+(define-hardware
+ (name h-st1)
+ (comment "status register1")
+ (type register HI)
+ (indices keyword "" ((st1 0)))
+ (get () (const 0))
+ (set (newval) (nop))
+)
+
+(dnh h-pc "program counter" (PC PROFILE) (pc) () () ())
+
+;; Setup Instruction opcode fields.
+
+;; There are zillion classes to consider. Actually 36 from the user manual.
+;; For now I am attempting to just handle class-one instructions.
+;; It might rework once I understand more about the encoding mechanisms.
+;; Documenting everything about class one encoding mechanisms is
+;; difficult here .. The spreadsheet that i wrote up accompanying this
+;; has everything we need.
+
+;; These are always 111 for class 1 instructions.
+(dnf f-class-major-opcode "Class one Highest Bits" () 13 3)
+;(dnf f-class-one-shift        "Class one 5 byte signed Shift Value" ()  0 5)
+(df  f-class-one-shift        "5 bit SHIFT sign extended"   ()  0  5 INT #f #f)
+(dnf f-class-one-sub-opcode-1   "Class one subopcode 1"     ()   10 3)
+(dnf f-class-one-sub-opcode-2   "Class one subopcode 2"     ()    5 3)
+
+(dnf f-class-one-s-field        "Class one S field" () 9 1)
+(dnf f-class-one-d-field        "Class one D field" () 8 1)
+(dnf f-class-one-n-field        "Class one N Field" () 9 1)
+
+;; FIXME::Ramana
+;; This needs to be redone for signed vs. unsigned case.
+;; Remember dnf is unsigned and df is for signed fields.
+;; (df name comment attributes start length mode encode decode)
+
+(df f-class-one-shimm-k9-field  "9 bit short imm" () 0 9 INT #f #f)
+(df f-class-one-shimm-k8-field  "8 bit short imm" () 0 8 INT #f #f)
+(df f-class-one-shimm-k5-field  "5 bit short imm" () 0 5 INT #f #f)
+(df f-class-one-shimm-k3-field  "3 bit short imm" () 0 3 INT #f #f)
+
+;; This is CC field
+(dnf f-class-one-cc8-field  "Class one CC8 Field" () 0 8 )
+(dnf f-class-one-cc2-field  "Class one CC2 Field" () 8 2 )
+
+;; This is SBIT
+(dnf f-class-sbit-field    "SBIT Field" () 0 3)
+(dnf f-class-arx-field     "ARX Field"  () 0 3)
+
+;; Register MMRX MMRY fields
+(dnf f-mmry-field          "MMRY Field" () 0 4)
+(dnf f-mmrx-field          "MMRX Field" () 4 4)
+
+(dnf f-limm-sixteen        "16 bit limm" () 0 16 )
+
+(dnf f-bit0     "Bit 0" () 0 1)
+
+;; Building blocks for a class one instruction
+;; add SRC,[,SHIFT],DST where SRC and DST are both accumulator registers.
+;;   and 5 bit signed shift.
+
+(dnop shift "5 bit signed shift value"  ()  h-sint   f-class-one-shift)
+(dnop accd   "accumulator destination register" ()    h-accums f-class-one-d-field)
+(dnop accs   "accumulator source register"  ()        h-accums f-class-one-s-field)
+
+
+
+
+(define-normal-insn-enum
+      insn-class-one-two-operands-shift "insn format enums" () CLASS1_2OPERANDS_SHIFT_
+      f-class-one-sub-opcode-2
+      ( ADD SUB LD SFTA AND OR XOR SFTL)
+)
+
+(define-normal-insn-enum
+      insn-class-major-identifier "Major class insn format enums" () CLASS_MAJOR_
+      f-class-major-opcode
+      (("1" 3))
+)
+
+(define-normal-insn-enum
+      insn-class-one-operator-id "Class 1 subopcode" () CLASS_1_SUBOPC_
+      f-class-one-sub-opcode-1
+      ( - "MVMM" - - "LOGICAL" "ARITH"  )
+)
+
+
+;; The instruction for addition.
+
+(dni addaccumshift "add accumulators and if necessary shift source"
+         ()
+         "add $accd,$shift,$accs"
+         (+ CLASS_MAJOR_1  CLASS_1_SUBOPC_ARITH accs accd shift
+            CLASS1_2OPERANDS_SHIFT_ADD)
+         (set accd (add DI accd
+                        (sll DI accs (ext DI shift))
+                        )
+              )
+         ()
+)
+
+
+
+;; Class 2 instruction fields.
+;(dnf f-class-two-shft         "Class two 4 byte unsigned Shft Value" () 0 4)
+;(dnop class-two-shft  "4 bit unsigned shft value" ()  h-uint   f-class-two-shift)
+
+
+(define (tic54x-opc)
+ (load-opc)
+ (cload #:arch "tic54x")
+ )
+(define (tic54x-sim)
+ (load-sim)
+ (cload #:arch "tic54x" #:options "with-scache with-profile=fn")
+ )
+
+(define (ppc-opc)
+ (load-opc)
+ (cload #:arch "powerpc")
+ )
+(define (ppc-sim)
+ (load-sim)
+ (cload #:arch "powerpc" #:options "with-scache with-profile=fn")
+ )
+ 

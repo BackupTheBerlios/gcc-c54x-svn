@@ -528,7 +528,8 @@ c54x_initial_elimination_offset(int from, int to)
 	/* {ARG_POINTER_REGNUM, STACK_POINTER_REGNUM}   */
 	/* {ARG_POINTER_REGNUM, FRAME_POINTER_REGNUM}   */
 	/* {FRAME_POINTER_REGNUM, STACK_POINTER_REGNUM} */
-	int aptospfp = get_frame_size() + 1;
+   int aptospfp = get_frame_size() + 1;
+   printf("frame size: %d\n", aptospfp);
 	int offset = 0xdead;
 	int regno;
 
